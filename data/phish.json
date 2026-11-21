@@ -2,361 +2,410 @@
   {
     "id": "bulk-phish",
     "name": "Bulk Phish",
-    "type": "Mass Blast Scam",
     "colour": "#D85A30",
     "shape": "classic",
     "difficulty": 1,
     "email": {
-      "fromName": "PayPai Security",
-      "fromAddress": "support@paypai-alerts-center.com",
-      "subject": "URGENT: Your account will be suspended in 24 hours",
-      "body": "Dear valued customer, we noticed unusual sign-in activity on your profile. URGENT: Your account will be suspended in 24 hours unless you confirm your details right now.",
-      "linkText": "Verify My Account Now",
-      "linkRealUrl": "http://paypai-security-check.xyz/login"
+      "fromName": "PayPai Account Team",
+      "fromAddress": "alerts@paypai-billing-notice.com",
+      "to": "you@college.edu",
+      "date": "Tue, 18 Nov, 9:42 AM",
+      "subject": "URGENT: Your account will be locked today",
+      "body": "Hello valued member,\n\nWe recently updated our routine billing checks across member profiles and noticed a pending verification item on your account. If you still use this email address for online payments, please review your details before the end of the day.\n\nURGENT: Your account will be locked today if you do not confirm your recent billing information through our verification portal.\n\nThank you for banking with us, and we hope you have a smooth week ahead.",
+      "linkText": "Confirm Billing Details",
+      "linkRealUrl": "https://paypai-billing-notice.com/login-check",
+      "signature": "PayPai Member Care\nReference #PP-88412\nMember Support Desk",
+      "footer": "PayPai Holdings Ltd., 400 Harbor Way, Suite 210."
     },
     "redFlags": [
       {
-        "id": "rf-1",
+        "id": "bulk-rf-1",
         "kind": "sender",
-        "text": "support@paypai-alerts-center.com",
-        "explanation": "Watch out for lookalike brand spelling and extra hyphenated domains. Official companies rarely email security alerts from third-party addresses."
+        "field": "fromAddress",
+        "text": "alerts@paypai-billing-notice.com",
+        "explanation": "That domain is a made-up lookalike address rather than an official payment domain. Always check the full sender address before trusting an alert."
       },
       {
-        "id": "rf-2",
+        "id": "bulk-rf-2",
         "kind": "urgency",
-        "text": "URGENT: Your account will be suspended in 24 hours",
-        "explanation": "Panic-inducing deadlines are classic bait to rush you into clicking before thinking. Slow down and check your real account page directly."
+        "field": "subject",
+        "text": "URGENT: Your account will be locked today",
+        "explanation": "Shouting in all caps and threatening an immediate lock is classic panic bait to rush your click. Real services rarely threaten same-day lockouts out of the blue."
       },
       {
-        "id": "rf-3",
+        "id": "bulk-rf-3",
         "kind": "greeting",
-        "text": "Dear valued customer",
-        "explanation": "Generic greetings show the message was blasted to thousands of people at once. Real service emails usually know your actual name."
+        "field": "body",
+        "text": "Hello valued member,",
+        "explanation": "A generic 'valued member' greeting instead of your name is common in mass phishing blasts. Scammers send the exact same template to thousands of inboxes."
       }
     ],
     "fieldGuide": {
-      "howItWorks": "Scammers cast a wide net by sending the exact same fake alert to millions of addresses, hoping a small fraction panic and hand over login credentials.",
-      "howToSpot": [
-        "Look closely at the sender address for misspelled brands or odd domains.",
-        "Spot manufactured countdowns or threats of sudden account deletion.",
-        "Notice vague greetings like 'Dear valued customer' instead of your name."
+      "howItWorks": "Sent in huge waves to thousands of addresses at once using generic greetings and one-size-fits-all panic hooks.",
+      "telltaleSigns": [
+        "Generic greetings like 'Dear customer' or 'Valued user'",
+        "Mass-market threats of account closure within 24 hours",
+        "Links leading to lookalike domains"
       ],
-      "whatToDo": "Ignore the email link and open the official website or app yourself to check if there is any real notice."
+      "defenseTip": "Pause when an email does not know your name and demands instant action; navigate to the service yourself instead of clicking."
     }
   },
   {
     "id": "spear-phish",
     "name": "Spear Phish",
-    "type": "Targeted Lure",
     "colour": "#D4537E",
     "shape": "classic",
     "difficulty": 2,
     "email": {
-      "fromName": "Maya Nair",
-      "fromAddress": "maya.nair@harborline-hr.co",
-      "subject": "Updated Q4 bonus sheet for Maya",
-      "body": "Hi Maya, I put together the updated Q4 bonus sheet for Maya ahead of today's review. Please review the attached spreadsheet before noon and sign off.",
-      "linkText": "Open Q4_Bonus_Sheet.xlsx",
-      "linkRealUrl": "https://harborline-hr.co.sharepoint-sync.ru/bonus"
+      "fromName": "Maya Lin — Campus Grants",
+      "fromAddress": "m.lin@campus-grants-portal.org",
+      "to": "you@college.edu",
+      "date": "Tue, 18 Nov, 11:15 AM",
+      "subject": "Autumn Research Stipend — updated form needed",
+      "body": "Hi there,\n\nI saw your name on the Autumn Research Stipend shortlist for the environmental studies track and wanted to follow up before Friday's roster lock.\n\nWe are moving stipend direct-deposit forms to a new single sign-on page this term. Please sign in with your campus credentials so we can keep your grant file active.\n\nLet me know if you have any questions about the timeline.",
+      "linkText": "Open Stipend SSO Form",
+      "linkRealUrl": "http://campus-grants-portal.org/sso-auth",
+      "signature": "Maya Lin\nResearch Coordinator, Fall Cohort\nCampus Grants Office",
+      "footer": "Sent regarding Fall Term student research awards."
     },
     "redFlags": [
       {
-        "id": "rf-1",
+        "id": "spear-rf-1",
         "kind": "sender",
-        "text": "maya.nair@harborline-hr.co",
-        "explanation": "A familiar-looking name paired with a slightly off domain is a big clue. Always double-check the exact domain after the @ symbol."
+        "field": "fromAddress",
+        "text": "m.lin@campus-grants-portal.org",
+        "explanation": "Even though the message mentions a real-sounding campus program, the sender comes from an external lookalike domain. Double-check that staff emails use your actual institution's domain."
       },
       {
-        "id": "rf-2",
-        "kind": "attachment",
-        "text": "Open Q4_Bonus_Sheet.xlsx",
-        "explanation": "Unexpected spreadsheets or 'urgent review' files can hide malicious macros or fake login forms. Confirm with the sender over a trusted channel first."
+        "id": "spear-rf-2",
+        "kind": "credential request",
+        "field": "body",
+        "text": "sign in with your campus credentials",
+        "explanation": "Asking you to enter your campus login details through an emailed form is a big red flag for credential theft. Legitimate coordinators will point you to your regular portal without credential prompts in email."
       },
       {
-        "id": "rf-3",
-        "kind": "urgency",
-        "text": "before noon",
-        "explanation": "Tight same-day cutoffs pressure you into opening files fast. Legitimate teammates won't mind a quick verification call or chat message."
+        "id": "spear-rf-3",
+        "kind": "link",
+        "field": "linkText",
+        "text": "Open Stipend SSO Form",
+        "explanation": "A button pushing you to a single sign-on page from an unexpected email can lead straight to a fake login screen. Check the real URL carefully before typing a password."
       }
     ],
     "fieldGuide": {
-      "howItWorks": "Unlike mass blasts, spear phishing tailors the message with personal or workplace details so it feels familiar and trustworthy at first glance.",
-      "howToSpot": [
-        "Verify the sender's full email domain even when the display name looks familiar.",
-        "Be cautious of unexpected spreadsheets, invoices, or review links.",
-        "Watch for tight deadlines paired with requests to open files or log in."
+      "howItWorks": "Researches a specific person, team, or role first so the lure sounds tailored, familiar, and relevant.",
+      "telltaleSigns": [
+        "References to real projects, colleagues, or recent events",
+        "Requests that feel slightly 'inside baseball'",
+        "Subtle sender domain mismatches"
       ],
-      "whatToDo": "Message or call the person using a known contact method to confirm they actually sent the file or request."
+      "defenseTip": "Verify unusual requests through a second channel—like a quick chat or phone call—using a known contact."
     }
   },
   {
     "id": "whale-ceo-fraud",
     "name": "Whale (CEO fraud)",
-    "type": "Executive Impersonation",
     "colour": "#5DCAA5",
     "shape": "round",
     "difficulty": 3,
     "email": {
-      "fromName": "Arthur Vance — CEO",
-      "fromAddress": "a.vance-exec@gmail.com",
-      "subject": "Keep this quiet — confidential wire needed",
-      "body": "Keep this quiet — confidential wire needed while I am in back-to-back board meetings. Send an immediate transfer to settle this vendor matter discreetly.",
-      "linkText": "View Wire Instructions",
-      "linkRealUrl": "http://wire-settlement-portal.top/pay"
+      "fromName": "David Vance",
+      "fromAddress": "d.vance@northstar-ventures.co",
+      "to": "you@college.edu",
+      "date": "Tue, 18 Nov, 2:08 PM",
+      "subject": "Quick favor before my flight — vendor settlement",
+      "body": "Hi,\n\nI am heading into a flight in twenty minutes and wrapping up a quiet advisory settlement with our external legal counsel before the quarter closes.\n\nCan you handle a quick gift-card purchase for the visiting speakers right now and email me the redemption codes? Keep this off the main thread until the paperwork is filed.\n\nThanks for jumping on this quickly.",
+      "linkText": "View Expense Note",
+      "linkRealUrl": "https://northstar-ventures.co/notes/q4-settlement",
+      "signature": "David Vance\nManaging Director\nNorthStar Ventures",
+      "footer": "Confidential executive correspondence."
     },
     "redFlags": [
       {
-        "id": "rf-1",
+        "id": "whale-rf-1",
         "kind": "sender",
-        "text": "a.vance-exec@gmail.com",
-        "explanation": "An executive claiming to be on company business from a free webmail address is a classic red flag. Check the official company domain."
+        "field": "fromAddress",
+        "text": "d.vance@northstar-ventures.co",
+        "explanation": "Notice the '.co' domain instead of a standard '.com'—a subtle swap that is easy to miss on a phone screen. Executives impersonated in whaling scams often use close lookalike domains."
       },
       {
-        "id": "rf-2",
-        "kind": "request",
-        "text": "Send an immediate transfer",
-        "explanation": "Requests for fast money transfers or gift cards via email should always trigger extra care. Follow standard approval steps no matter who asks."
+        "id": "whale-rf-2",
+        "kind": "unusual request",
+        "field": "body",
+        "text": "gift-card purchase for the visiting speakers",
+        "explanation": "Asking someone to buy gift cards and send back codes is a classic executive-impersonation trap. Real speaker expenses go through standard reimbursement or vendor channels."
       },
       {
-        "id": "rf-3",
-        "kind": "urgency",
-        "text": "Keep this quiet — confidential wire needed",
-        "explanation": "Asking you to keep a financial request secret stops you from getting a second pair of eyes. Real finance workflows don't rely on secrecy."
+        "id": "whale-rf-3",
+        "kind": "secrecy",
+        "field": "body",
+        "text": "Keep this off the main thread",
+        "explanation": "Urging secrecy or asking you to keep things off the usual thread is designed to stop you from checking with coworkers. Scammers love quiet requests made right before someone is 'unavailable'."
       }
     ],
     "fieldGuide": {
-      "howItWorks": "Big-fish attackers impersonate executives or directors and ask employees to move money or share sensitive data quickly and quietly.",
-      "howToSpot": [
-        "Check if a leader is emailing from an unverified or personal address.",
-        "Spot demands for secrecy, discretion, or skipping normal approval steps.",
-        "Be alert to urgent payment, wire, or gift card requests."
+      "howItWorks": "Impersonates a senior leader or executive to pressure employees into bypassing normal approval or payment steps.",
+      "telltaleSigns": [
+        "Authority and time pressure ('in a meeting', 'on a flight')",
+        "Requests for wire transfers, gift cards, or sensitive files",
+        "Hints to keep the request quiet or 'off-thread'"
       ],
-      "whatToDo": "Pause any payment and verify the request directly through your finance team or established out-of-band channels."
+      "defenseTip": "Treat any urgent money or data request from 'the boss' as suspicious until confirmed via an established process."
     }
   },
   {
     "id": "clone-phish",
     "name": "Clone Phish",
-    "type": "Duplicated Message",
     "colour": "#7F77DD",
     "shape": "classic",
     "difficulty": 2,
     "email": {
-      "fromName": "CloudBox Team",
-      "fromAddress": "updates@cloudbox-helpdesk.net",
-      "subject": "Re: Shared folder 'Team_Designs_Final' — new version",
-      "body": "Here is the revised copy of the message you saw earlier with an updated link. Re: Shared folder 'Team_Designs_Final' — new version is ready to view.",
-      "linkText": "Access Revised Folder",
-      "linkRealUrl": "https://cloudbox-sync-login.info/designs"
+      "fromName": "CloudBox Shared Docs",
+      "fromAddress": "updates@cloudbox-sync-share.com",
+      "to": "you@college.edu",
+      "date": "Tue, 18 Nov, 4:27 PM",
+      "subject": "Re: Updated Syllabus & Lab Schedule (Revised)",
+      "body": "Hi,\n\nFollowing up on last week's shared folder thread, here is the revised version of the Syllabus & Lab Schedule with updated room assignments.\n\nBecause the earlier attachment had a formatting hiccup, I re-uploaded the clean copy to this replacement link. Please open the revised file to grab the latest dates.\n\nBest,\nSamira",
+      "linkText": "Download Revised Schedule",
+      "linkRealUrl": "https://cloudbox-sync-share.com/r/syllabus-v2",
+      "signature": "CloudBox Document Relay\nShared Workspace Notifications\nCloudBox Team",
+      "footer": "Automated file-share notice for your workspace."
     },
     "redFlags": [
       {
-        "id": "rf-1",
+        "id": "clone-rf-1",
         "kind": "sender",
-        "text": "updates@cloudbox-helpdesk.net",
-        "explanation": "Even when the wording mirrors a real notice, the sender domain is a lookalike. Always check where the email actually came from."
+        "field": "fromAddress",
+        "text": "updates@cloudbox-sync-share.com",
+        "explanation": "This 'sync-share' domain mimics a file-sharing notice rather than coming from your real document service. Always look closely at the domain behind file-update alerts."
       },
       {
-        "id": "rf-2",
+        "id": "clone-rf-2",
+        "kind": "lure tactic",
+        "field": "body",
+        "text": "re-uploaded the clean copy to this replacement link",
+        "explanation": "Claiming an earlier file had an error and offering a 'replacement link' is how clone phishers swap in a malicious lure. Treat surprise 'revised copy' links with extra care."
+      },
+      {
+        "id": "clone-rf-3",
         "kind": "link",
-        "text": "Access Revised Folder",
-        "explanation": "A 'revised' link inside a cloned message often points to a credential-stealing page. Navigate to your real cloud storage instead of clicking."
-      },
-      {
-        "id": "rf-3",
-        "kind": "greeting",
-        "text": "Here is the revised copy of the message you saw earlier with an updated link",
-        "explanation": "Claiming to resend an earlier message with a 'new link' is a common trick to swap in a malicious URL. Compare it with your original thread."
+        "field": "linkText",
+        "text": "Download Revised Schedule",
+        "explanation": "A download button attached to an unexpected 'revised' file notice can steer you to a spoofed page or risky download. Check with the sender before opening replacement links."
       }
     ],
     "fieldGuide": {
-      "howItWorks": "Attackers copy a legitimate or previously seen email and swap out the link or attachment for a harmful version while keeping the text familiar.",
-      "howToSpot": [
-        "Compare the sender address against genuine emails from the same service.",
-        "Watch for 'updated link' or 'revised version' claims out of nowhere.",
-        "Hover or inspect link destinations before opening shared files."
+      "howItWorks": "Takes a legitimate or previously sent email, copies its layout and topic, and swaps in a harmful link or attachment.",
+      "telltaleSigns": [
+        "'Updated' or 'resubmitted' versions of familiar files",
+        "Slightly altered sender details or forwarding paths",
+        "A new link where you expected a normal document"
       ],
-      "whatToDo": "Open your cloud drive or service directly in a new tab and locate the file without using the email's link."
+      "defenseTip": "Compare against the original message and check the true destination URL before opening 'replacement' files."
     }
   },
   {
     "id": "invoice-eel",
     "name": "Invoice Eel",
-    "type": "Fake Billing Lure",
     "colour": "#FAC775",
     "shape": "long",
     "difficulty": 2,
     "email": {
-      "fromName": "BreezyPay Billing",
-      "fromAddress": "billing@breezypay-invoices.org",
-      "subject": "Invoice #INV-88412 overdue — automatic charge failed",
-      "body": "Your card was declined for Invoice #INV-88412 overdue — automatic charge failed. Download the itemized bill and update your payment card today.",
-      "linkText": "Download Invoice PDF",
-      "linkRealUrl": "http://breezypay-billing-update.click/inv-88412"
+      "fromName": "PrintWave Supplies",
+      "fromAddress": "billing@printwave-invoices.net",
+      "to": "you@college.edu",
+      "date": "Wed, 19 Nov, 8:50 AM",
+      "subject": "Overdue balance notice — Statement #PW-4471",
+      "body": "Hello,\n\nOur accounts receivable log shows an unpaid balance tied to recent poster and lab-binder printing for student clubs.\n\nWe have attached a copy of the statement along with the itemized line items for your review. Please check the attached document if you need the breakdown before scheduling payment.\n\nThanks for your help keeping our ledger tidy.",
+      "linkText": "Review Statement Online",
+      "linkRealUrl": "https://printwave-invoices.net/statements/4471",
+      "attachmentName": "Invoice_4471.pdf.exe",
+      "signature": "PrintWave Billing Department\nAccounts Receivable\nPrintWave Supplies",
+      "footer": "Statement reference #PW-4471. Reply to billing with questions."
     },
     "redFlags": [
       {
-        "id": "rf-1",
+        "id": "eel-rf-1",
         "kind": "sender",
-        "text": "billing@breezypay-invoices.org",
-        "explanation": "Billing scams love tacking words like '-invoices' onto a brand name. Check your real account portal to see if an invoice actually exists."
+        "field": "fromAddress",
+        "text": "billing@printwave-invoices.net",
+        "explanation": "A separate '-invoices.net' billing domain is a common cover for fake payment notices. Verify billing emails against known vendor contacts before acting."
       },
       {
-        "id": "rf-2",
+        "id": "eel-rf-2",
         "kind": "attachment",
-        "text": "Download Invoice PDF",
-        "explanation": "Fake 'invoice PDF' buttons can lead to spoofed payment pages or unwanted downloads. Never enter card details from an email link."
+        "field": "attachmentName",
+        "text": "Invoice_4471.pdf.exe",
+        "explanation": "Double extensions like '.pdf.exe' hide an executable program behind a document icon. Never run an '.exe' file that pretends to be an invoice or PDF."
       },
       {
-        "id": "rf-3",
-        "kind": "urgency",
-        "text": "update your payment card today",
-        "explanation": "A sudden 'failed charge' notice tries to make you re-enter your card number in a hurry. Log in through your saved bookmark to check billing."
+        "id": "eel-rf-3",
+        "kind": "link",
+        "field": "linkText",
+        "text": "Review Statement Online",
+        "explanation": "Pushing you to click an online statement link on an unexpected invoice notice is a frequent phishing hook. Check your real vendor portal directly instead."
       }
     ],
     "fieldGuide": {
-      "howItWorks": "Slippery billing lures send fake overdue notices or failed payment alerts so victims hand over credit card numbers or open booby-trapped files.",
-      "howToSpot": [
-        "Check if you recognize the subscription, order, or invoice number.",
-        "Look out for extra words added to a company's domain name.",
-        "Avoid entering payment card details through links inside billing emails."
+      "howItWorks": "Uses fake invoices, receipts, or overdue notices to spark worry about money and trick you into opening bad files or links.",
+      "telltaleSigns": [
+        "Unexpected bills or overdue notices for unfamiliar charges",
+        "Attachments with tricky or executable file extensions",
+        "Payment links on generic or mismatched billing domains"
       ],
-      "whatToDo": "Log in to your account directly from a trusted bookmark or app to check your real billing status."
+      "defenseTip": "Never open suspicious attachments or pay through emailed links; check your real account or ask accounting first."
     }
   },
   {
     "id": "delivery-dart",
     "name": "Delivery Dart",
-    "type": "Package Tracking Scam",
     "colour": "#5DCAA5",
     "shape": "spiky",
     "difficulty": 1,
     "email": {
-      "fromName": "SwiftPost Parcel",
+      "fromName": "SwiftPost Parcel Desk",
       "fromAddress": "track@swiftpost-redelivery.info",
-      "subject": "Parcel delivery failed: pay $2.99 re-delivery fee",
-      "body": "We tried to deliver your package today, but Parcel delivery failed: pay $2.99 re-delivery fee so your courier can reschedule drop-off.",
-      "linkText": "Pay Redelivery Fee",
-      "linkRealUrl": "http://swiftpost-fee-pay.xyz/parcel"
+      "to": "you@college.edu",
+      "date": "Wed, 19 Nov, 10:19 AM",
+      "subject": "Parcel delivery attempt failed — action required",
+      "body": "Hi customer,\n\nA courier attempted to deliver a package addressed to your location this morning, but could not complete handoff due to an incomplete delivery note.\n\nYour parcel will be returned to the depot unless you confirm a new delivery window and address details right away.\n\nThank you for using SwiftPost.",
+      "linkText": "Reschedule Delivery Now",
+      "linkRealUrl": "http://swiftpost-redelivery.info/parcel/update",
+      "signature": "SwiftPost Courier Support\nParcel Routing Desk\nSwiftPost Logistics",
+      "footer": "Automated delivery status alert from SwiftPost."
     },
     "redFlags": [
       {
-        "id": "rf-1",
+        "id": "dart-rf-1",
         "kind": "sender",
+        "field": "fromAddress",
         "text": "track@swiftpost-redelivery.info",
-        "explanation": "Couriers rarely send payment links from '-redelivery.info' addresses. Check the tracking number on the official carrier site."
+        "explanation": "A 'redelivery.info' address is a classic sign of a package-tracking phish rather than an official carrier. Always check tracking numbers on the actual carrier's website."
       },
       {
-        "id": "rf-2",
-        "kind": "request",
-        "text": "pay $2.99 re-delivery fee",
-        "explanation": "Small 'redelivery' fees are a classic trap to steal card numbers and billing addresses. Treat surprise fee prompts with suspicion."
+        "id": "dart-rf-2",
+        "kind": "threat",
+        "field": "body",
+        "text": "returned to the depot unless you confirm",
+        "explanation": "Threatening to return a parcel unless you confirm details right away creates artificial urgency. Scammers use missed-delivery scares because people often have packages on the way."
       },
       {
-        "id": "rf-3",
+        "id": "dart-rf-3",
         "kind": "link",
-        "text": "Pay Redelivery Fee",
-        "explanation": "Clicking a payment button in a surprise delivery text or email can send you straight to a fake checkout page. Verify your order first."
+        "field": "linkText",
+        "text": "Reschedule Delivery Now",
+        "explanation": "A big 'Reschedule Delivery Now' button in a surprise tracking email often leads to credential or small-fee scams. Look up your order in the store you bought it from instead."
       }
     ],
     "fieldGuide": {
-      "howItWorks": "Delivery darts strike when people are expecting packages, using a tiny fee or missed-delivery alert to capture card details.",
-      "howToSpot": [
-        "Question any surprise fee—even a tiny one—for missed delivery.",
-        "Inspect the sender domain for unofficial add-ons like '-redelivery'.",
-        "Check whether you actually ordered anything with a matching tracking ID."
+      "howItWorks": "Dangles a missed delivery, customs fee, or tracking update to get a quick click while you are expecting an order.",
+      "telltaleSigns": [
+        "No tracking number or order details you recognize",
+        "Urgent warnings that a package will be returned or held",
+        "Shortened or unfamiliar tracking domains"
       ],
-      "whatToDo": "Go straight to the carrier's or store's official website and track your package there instead of paying through the email."
+      "defenseTip": "Skip emailed tracking links and check your order status directly inside the store or carrier app you trust."
     }
   },
   {
     "id": "fake-login-ray",
     "name": "Fake Login Ray",
-    "type": "Credential Harvester",
     "colour": "#7F77DD",
     "shape": "spiky",
     "difficulty": 2,
     "email": {
-      "fromName": "Amazun Account Team",
-      "fromAddress": "no-reply@amazun-signin-security.com",
-      "subject": "Unrecognized browser sign-in blocked",
-      "body": "Someone attempted to sign in from a new device. Unrecognized browser sign-in blocked — sign in here to review your session settings.",
-      "linkText": "Sign In to Review Session",
-      "linkRealUrl": "http://amazun-session-verify.top/signin"
+      "fromName": "Micro-soft Security Team",
+      "fromAddress": "security@micro-soft-signon-alert.com",
+      "to": "you@college.edu",
+      "date": "Wed, 19 Nov, 1:44 PM",
+      "subject": "Unrecognized sign-in attempt on your cloud profile",
+      "body": "Hello,\n\nOur automated security monitor logged a sign-in attempt from a browser session that looked different from your usual activity.\n\nIf this was not you, please sign in immediately to review your active sessions and keep your account protected.\n\nWe sent this notice to help keep your workspace safe.",
+      "linkText": "Sign In to Review Activity",
+      "linkRealUrl": "https://micro-soft-signon-alert.com/verify-session",
+      "signature": "Micro-soft Account Protection\nAutomated Security Alerts\nMicro-soft Cloud Services",
+      "footer": "Security alert sent to protect your cloud account."
     },
     "redFlags": [
       {
-        "id": "rf-1",
+        "id": "ray-rf-1",
         "kind": "sender",
-        "text": "no-reply@amazun-signin-security.com",
-        "explanation": "Notice the misspelled brand name and extra security words in the domain. That address isn't the real company."
+        "field": "fromAddress",
+        "text": "security@micro-soft-signon-alert.com",
+        "explanation": "This hyphenated 'micro-soft-signon-alert.com' address is a lookalike domain built to trick you. Real security notices come from the service's actual domain."
       },
       {
-        "id": "rf-2",
-        "kind": "link",
-        "text": "Sign In to Review Session",
-        "explanation": "Links telling you to 'sign in here' from an email are a prime way attackers harvest passwords. Always type or bookmark the real sign-in page."
-      },
-      {
-        "id": "rf-3",
+        "id": "ray-rf-2",
         "kind": "urgency",
-        "text": "Unrecognized browser sign-in blocked",
-        "explanation": "A scary security alert nudges you to type your password without checking the web address. Stay calm and open your account directly."
+        "field": "body",
+        "text": "sign in immediately to review your active sessions",
+        "explanation": "Pushing you to 'sign in immediately' from an alert email is designed to funnel you onto a fake login page. Open a fresh browser tab to your real account settings instead."
+      },
+      {
+        "id": "ray-rf-3",
+        "kind": "link",
+        "field": "linkText",
+        "text": "Sign In to Review Activity",
+        "explanation": "Clicking a sign-in button inside a security email can land you on a credential-harvesting clone. Always navigate to your account page yourself before typing a password."
       }
     ],
     "fieldGuide": {
-      "howItWorks": "Fake login rays lure you to a lookalike sign-in page designed to copy your username, password, and sometimes your one-time login code.",
-      "howToSpot": [
-        "Spot subtle misspellings in the brand name or sender domain.",
-        "Be wary of emails asking you to log in via an embedded button.",
-        "Check the browser address bar before ever typing a password."
+      "howItWorks": "Sends you to a cloned login page that looks almost identical to a real sign-in screen to steal your password or code.",
+      "telltaleSigns": [
+        "Lookalike domains with extra words, hyphens, or typos",
+        "Security alerts that push you to log in through a link",
+        "Login pages missing your password manager autofill"
       ],
-      "whatToDo": "Close the email, open the site yourself via a trusted bookmark or app, and check your active sessions there."
+      "defenseTip": "Bookmark important login pages or type the address yourself—never trust a sign-in link from an email alert."
     }
   },
   {
     "id": "tech-support-crab",
     "name": "Tech Support Crab",
-    "type": "IT Helpdesk Scam",
     "colour": "#D85A30",
     "shape": "round",
     "difficulty": 3,
     "email": {
-      "fromName": "IT Helpdesk Support",
-      "fromAddress": "helpdesk@corp-mail-quota.net",
-      "subject": "Mailbox 99% full — mailbox deletion warning",
-      "body": "Your storage quota is almost reached. Mailbox 99% full — mailbox deletion warning will apply unless you validate your webmail credentials.",
-      "linkText": "Keep Current Mailbox Quota",
-      "linkRealUrl": "http://corp-webmail-quota-check.xyz/auth"
+      "fromName": "Amazun Web & Device Care",
+      "fromAddress": "support@amazun-device-help.com",
+      "to": "you@college.edu",
+      "date": "Wed, 19 Nov, 4:05 PM",
+      "subject": "Mailbox sync issue & remote diagnostic check",
+      "body": "Hi,\n\nOur support queue flagged a recurring sync error between your mail client and cloud storage profile that can cause drafts to stall.\n\nIf the issue continues, you can run a quick remote diagnostic session with an agent so we can adjust your local mail settings.\n\nReach out if you would like help walking through the steps.",
+      "linkText": "Start Remote Diagnostic",
+      "linkRealUrl": "https://amazun-device-help.com/support/remote-tool",
+      "signature": "Amazun Technical Support\nClient Sync & Diagnostics\nAmazun Care Team",
+      "footer": "Support ticket follow-up from Amazun Device Care."
     },
     "redFlags": [
       {
-        "id": "rf-1",
+        "id": "crab-rf-1",
         "kind": "sender",
-        "text": "helpdesk@corp-mail-quota.net",
-        "explanation": "Generic 'IT Helpdesk' names paired with outside or lookalike domains are a classic trap. Verify the sender address carefully."
+        "field": "fromAddress",
+        "text": "support@amazun-device-help.com",
+        "explanation": "Spotting 'amazun' with a 'u' instead of an 'o' catches a subtle lookalike domain. Always check spelling in the sender's address before trusting support messages."
       },
       {
-        "id": "rf-2",
-        "kind": "urgency",
-        "text": "Mailbox 99% full — mailbox deletion warning",
-        "explanation": "Threatening to wipe your inbox over storage quota is a pressure tactic to steal your login. Real quota notices don't demand password entry via email links."
+        "id": "crab-rf-2",
+        "kind": "remote access",
+        "field": "body",
+        "text": "run a quick remote diagnostic session with an agent",
+        "explanation": "Unsolicited offers to start a remote session on your device are a major warning sign in tech-support scams. Legitimate support teams do not ask you to hand over remote control out of nowhere."
       },
       {
-        "id": "rf-3",
-        "kind": "request",
-        "text": "validate your webmail credentials",
-        "explanation": "No legitimate support desk needs you to 'validate your credentials' through a random link. Report suspicious IT emails to your real security team."
+        "id": "crab-rf-3",
+        "kind": "link",
+        "field": "linkText",
+        "text": "Start Remote Diagnostic",
+        "explanation": "A link inviting you to launch a remote diagnostic tool can install unwanted software or give an attacker access. Contact your official helpdesk directly if you ever need support."
       }
     ],
     "fieldGuide": {
-      "howItWorks": "Scammers pose as IT support or helpdesk staff, claiming your mailbox or account is about to be deleted so you hand over your login.",
-      "howToSpot": [
-        "Watch for alarming warnings about mailbox deletion or quota expiration.",
-        "Check if the sender address matches your actual organization or provider.",
-        "Be suspicious of any prompt to re-enter or 'validate' account passwords."
+      "howItWorks": "Pretends to be IT or customer support offering 'urgent fixes,' remote help, or a phone number to call.",
+      "telltaleSigns": [
+        "Unsolicited warnings about 'errors' or 'compromised devices'",
+        "Prompts to download tools or grant remote access",
+        "Pressure to call an unfamiliar support number"
       ],
-      "whatToDo": "Don't enter your password on linked pages—check your storage in account settings or contact your real IT team."
+      "defenseTip": "Never grant remote access or run diagnostic tools from an unsolicited message; contact official support directly."
     }
   }
 ]
