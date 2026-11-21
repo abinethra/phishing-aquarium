@@ -38,7 +38,6 @@
             </svg>
           </div>
           <canvas id="tank" width="1040" height="460" aria-label="Interactive aquarium tank with swimming email fish" tabindex="0"></canvas>
-          <div class="sand-bed" aria-hidden="true"></div>
         </div>
 
         <aside id="inspector-card" class="inspector-card is-empty" aria-label="Email inspector" aria-live="polite">
@@ -87,55 +86,5 @@
   <script src="js/storage.js"></script>
   <script src="js/tank.js"></script>
   <script src="js/game.js"></script>
-  <script>
-    // Step 1 placeholder canvas rendering
-    (function renderPlaceholderTank() {
-      const canvas = document.getElementById('tank');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-
-      const placeholders = [
-        { x: 95, y: 80, w: 120, h: 58, color: '#D85A30', label: 'Phish #1' },
-        { x: 355, y: 76, w: 118, h: 56, color: '#D4537E', label: 'Phish #2' },
-        { x: 205, y: 215, w: 112, h: 54, color: '#5DCAA5', label: 'Phish #3' },
-        { x: 390, y: 185, w: 165, h: 72, color: '#1B499B', label: 'Whale #4' },
-        { x: 145, y: 310, w: 92, h: 44, color: '#FAC775', label: 'Phish #5' },
-        { x: 465, y: 295, w: 108, h: 50, color: '#7F77DD', label: 'Phish #6' }
-      ];
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Dashed target reticle on first placeholder
-      const target = placeholders[0];
-      ctx.save();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 3.5;
-      ctx.setLineDash([10, 8]);
-      ctx.beginPath();
-      ctx.roundRect(target.x - 16, target.y - 16, target.w + 32, target.h + 32, 18);
-      ctx.stroke();
-      ctx.restore();
-
-      // Draw placeholder rectangles
-      placeholders.forEach((item) => {
-        ctx.save();
-        ctx.fillStyle = item.color;
-        ctx.strokeStyle = '#111318';
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.roundRect(item.x, item.y, item.w, item.h, 14);
-        ctx.fill();
-        ctx.stroke();
-
-        // Envelope badge
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.roundRect(item.x + item.w * 0.34, item.y + item.h * 0.28, item.w * 0.32, item.h * 0.44, 4);
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-      });
-    })();
-  </script>
 </body>
 </html>
