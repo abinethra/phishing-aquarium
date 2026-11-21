@@ -1,0 +1,677 @@
+:root {
+  /* Core Palette & Deep-Ocean Theme */
+  --bg-page: #0B0D12;
+  --ocean-deep: #0C3A5B;
+  --ocean-mid: #1659B8;
+  --ocean-top-band: #2C74D8;
+  --seabed-dark: #0A2E48;
+  --sand-gold: #F8C66D;
+  --sand-border: #111318;
+
+  /* Retro Console Surface */
+  --console-shell: #D6D3CB;
+  --console-shell-dark: #C2BEB4;
+  --stipple-dot: rgba(38, 36, 33, 0.38);
+  --ink-black: #111318;
+  --card-white: #FFFFFF;
+  --text-primary: #181A20;
+  --text-muted: #5A5F6D;
+
+  /* Fish & Accent Colours */
+  --accent-coral: #D85A30;
+  --accent-salmon: #F39678;
+  --accent-amber: #FAC775;
+  --accent-teal: #5DCAA5;
+  --accent-purple: #7F77DD;
+  --accent-pink: #D4537E;
+
+  /* Red Flag Highlighting */
+  --flag-bg: #F7C1C1;
+  --flag-text: #7A1414;
+
+  /* Typography */
+  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Radii & Outlines */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+  --outline-thick: 3px;
+  --outline-medium: 2.5px;
+  --shadow-sticker: 4px 5px 0px rgba(17, 19, 24, 0.25);
+  --shadow-console: 0 24px 60px rgba(0, 0, 0, 0.65);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background-color: var(--bg-page);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle background star specks matching retro device backdrop */
+.starfield {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 5% 11%, rgba(255, 255, 255, 0.65) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 92% 17%, rgba(255, 255, 255, 0.6) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 4% 58%, rgba(255, 255, 255, 0.55) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 95% 68%, rgba(255, 255, 255, 0.65) 50%, transparent 100%),
+    radial-gradient(1px 1px at 86% 8%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+  z-index: 0;
+}
+
+/* Layout Container */
+.app-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+/* Top Header Bar */
+.top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.title-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.game-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1.35rem, 3vw, 2.05rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+}
+
+.hud-pills {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink-black);
+  border: var(--outline-medium) solid var(--ink-black);
+}
+
+.pill strong {
+  font-weight: 700;
+}
+
+.pill-score {
+  background-color: var(--accent-amber);
+}
+
+.pill-caught {
+  background-color: var(--accent-salmon);
+}
+
+/* Retro Aquarium Device Frame */
+.aquarium-console {
+  background-color: var(--console-shell);
+  color: var(--text-primary);
+  border: var(--outline-thick) solid var(--ink-black);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-5) var(--space-5);
+  box-shadow: var(--shadow-console);
+  position: relative;
+}
+
+/* Stippled Dot Texture Strips */
+.stippled-band {
+  height: 14px;
+  width: 100%;
+  background-image: radial-gradient(var(--stipple-dot) 1.6px, transparent 1.6px);
+  background-size: 10px 7px;
+  background-position: 0 0;
+}
+
+.console-lip {
+  margin-bottom: var(--space-3);
+}
+
+.console-divider {
+  margin: var(--space-3) 0;
+}
+
+/* Tank Stage & Water Window */
+.tank-stage {
+  position: relative;
+  width: 100%;
+}
+
+.tank-viewport {
+  position: relative;
+  width: 100%;
+  height: 460px;
+  border: var(--outline-thick) solid var(--ink-black);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--ocean-mid) 0%, var(--ocean-deep) 88%, var(--seabed-dark) 100%);
+  box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Lighter Top Water Band + Subtle Animated Wave Line */
+.water-top-band {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 31%;
+  background: linear-gradient(180deg, rgba(66, 139, 245, 0.65) 0%, rgba(44, 116, 216, 0.52) 100%);
+  border-bottom: 2px solid rgba(135, 190, 255, 0.28);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.wave-svg {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 200%;
+  height: 22px;
+  animation: waveShift 9s linear infinite;
+}
+
+.wave-path {
+  fill: rgba(22, 89, 184, 0.45);
+  stroke: rgba(186, 222, 255, 0.45);
+  stroke-width: 2;
+}
+
+@keyframes waveShift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Seabed Strip Preview */
+.sand-bed {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  background: linear-gradient(180deg, var(--sand-gold) 0%, #E7AF52 100%);
+  border-top: var(--outline-thick) solid var(--ink-black);
+  z-index: 1;
+  pointer-events: none;
+}
+
+#tank {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+#tank:focus-visible,
+.pill-btn:focus-visible,
+.species-card:focus-visible {
+  outline: 3px solid var(--accent-teal);
+  outline-offset: 3px;
+}
+
+/* Overlaid Email Inspector Sticker */
+.inspector-card {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 4;
+  width: 292px;
+  min-height: 318px;
+  background-color: var(--card-white);
+  color: var(--text-primary);
+  border: var(--outline-thick) solid var(--ink-black);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sticker);
+  transform: rotate(2.4deg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.inspector-empty-state {
+  text-align: center;
+  padding: var(--space-3) var(--space-2);
+}
+
+.empty-envelope-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 38px;
+  margin-bottom: var(--space-3);
+  border: var(--outline-medium) solid var(--ink-black);
+  border-radius: 8px;
+  background-color: #F4F6FA;
+  font-size: 1.35rem;
+  color: var(--ocean-deep);
+}
+
+.empty-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink-black);
+}
+
+.empty-sub {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+/* Bottom Deck: Collection Strip & Controls */
+.console-deck {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.collection-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.deck-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.collection-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.slot {
+  width: 56px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  user-select: none;
+}
+
+.slot-empty {
+  border: var(--outline-medium) dashed var(--ink-black);
+  background-color: rgba(255, 255, 255, 0.35);
+  color: var(--text-muted);
+}
+
+.deck-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+}
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  background-color: var(--card-white);
+  color: var(--ink-black);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: var(--outline-thick) solid var(--ink-black);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 3px 0 var(--ink-black);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.pill-btn:hover {
+  background-color: var(--accent-amber);
+  transform: translateY(-1px);
+}
+
+.pill-btn:active {
+  transform: translateY(1px);
+}
+
+/* Decorative Console Power Switch */
+.power-switch {
+  width: 64px;
+  height: 44px;
+  background-color: #262523;
+  border: var(--outline-thick) solid var(--ink-black);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.switch-rocker {
+  width: 22px;
+  height: 28px;
+  background-color: var(--card-white);
+  border-radius: 4px;
+}
+
+.switch-line {
+  width: 14px;
+  height: 3px;
+  background-color: #6E6B64;
+  border-radius: 2px;
+}
+
+/* Console Base Plinth & Little Feet */
+.console-base {
+  width: 82%;
+  height: 22px;
+  margin: 0 auto;
+  background-color: var(--console-shell-dark);
+  border: var(--outline-thick) solid var(--ink-black);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.console-feet {
+  width: 68%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+}
+
+.foot {
+  width: 54px;
+  height: 10px;
+  background-color: #2B2A28;
+  border: 2.5px solid var(--ink-black);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+/* =========================================================
+   Collection & Field Guide Page
+   ========================================================= */
+.field-guide-console {
+  padding-bottom: var(--space-4);
+}
+
+.guide-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--ocean-deep);
+  color: #FFFFFF;
+  border: var(--outline-thick) solid var(--ink-black);
+  border-radius: var(--radius-md);
+}
+
+.guide-heading {
+  margin: 0 0 4px;
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.guide-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #CBE3F6;
+}
+
+.guide-progress-badge {
+  padding: 6px 14px;
+  background-color: var(--accent-teal);
+  color: var(--ink-black);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: var(--outline-medium) solid var(--ink-black);
+  border-radius: var(--radius-pill);
+}
+
+.species-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+
+.species-card {
+  background-color: var(--card-white);
+  color: var(--text-primary);
+  border: var(--outline-thick) solid var(--ink-black);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sticker);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: transform 0.18s ease;
+}
+
+.species-card:nth-child(odd) {
+  transform: rotate(-0.8deg);
+}
+
+.species-card:nth-child(even) {
+  transform: rotate(0.8deg);
+}
+
+.species-card:hover {
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.species-card.is-locked {
+  background-color: #F4F3EF;
+}
+
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.species-number {
+  color: var(--ocean-deep);
+}
+
+.species-status {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background-color: #E2E0D8;
+  color: var(--text-muted);
+  border: 1.5px solid var(--ink-black);
+}
+
+.species-silhouette {
+  height: 76px;
+  margin: var(--space-1) 0;
+  border: var(--outline-medium) dashed #8E929E;
+  border-radius: var(--radius-sm);
+  background-color: #E9E7DF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #7B808C;
+}
+
+.species-name {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.species-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  flex-grow: 1;
+}
+
+.species-tags {
+  margin-top: var(--space-1);
+}
+
+.flag-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background-color: var(--flag-bg);
+  color: var(--flag-text);
+}
+
+.flag-chip.locked-chip {
+  background-color: #E2E0D8;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   Responsive Breakpoints (Down to 360px)
+   ========================================================= */
+@media (max-width: 960px) {
+  .species-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .aquarium-console {
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+  }
+
+  .tank-viewport {
+    height: 300px;
+  }
+
+  /* Move inspector below tank on mobile */
+  .inspector-card {
+    position: static;
+    width: 100%;
+    min-height: 150px;
+    margin-top: var(--space-3);
+    transform: rotate(0deg);
+  }
+
+  .slot {
+    width: 44px;
+    height: 38px;
+    font-size: 0.9rem;
+  }
+
+  .deck-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell {
+    padding: var(--space-3) var(--space-2) var(--space-5);
+  }
+
+  .pill {
+    padding: 6px 12px;
+    font-size: 0.84rem;
+  }
+
+  .species-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .collection-slots {
+    gap: 6px;
+  }
+
+  .slot {
+    width: 36px;
+    height: 34px;
+  }
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .wave-svg {
+    animation: none;
+  }
+
+  .inspector-card,
+  .species-card,
+  .pill-btn {
+    transition: none;
+  }
+}

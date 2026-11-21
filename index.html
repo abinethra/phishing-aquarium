@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Phishing Aquarium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+
+  <main class="app-shell">
+    <header class="top-bar">
+      <h1 class="game-title">The Phishing Aquarium</h1>
+      <div class="hud-pills" aria-label="Game statistics">
+        <div class="pill pill-score" aria-live="polite">
+          <span>Score</span>
+          <strong id="score-display">0</strong>
+        </div>
+        <div class="pill pill-caught" aria-live="polite">
+          <span>Caught</span>
+          <strong id="caught-display">0 / 8</strong>
+        </div>
+      </div>
+    </header>
+
+    <section class="aquarium-console" aria-label="Phishing Aquarium Console">
+      <div class="console-lip stippled-band" aria-hidden="true"></div>
+
+      <div class="tank-stage">
+        <div class="tank-viewport">
+          <div class="water-top-band" aria-hidden="true">
+            <svg class="wave-svg" viewBox="0 0 1200 28" preserveAspectRatio="none">
+              <path class="wave-path" d="M0,14 C150,24 300,4 450,14 C600,24 750,4 900,14 C1050,24 1200,4 1350,14 L1350,28 L0,28 Z" />
+            </svg>
+          </div>
+          <canvas id="tank" width="1040" height="460" aria-label="Interactive aquarium tank with swimming email fish" tabindex="0"></canvas>
+          <div class="sand-bed" aria-hidden="true"></div>
+        </div>
+
+        <aside id="inspector-card" class="inspector-card is-empty" aria-label="Email inspector" aria-live="polite">
+          <div class="inspector-empty-state">
+            <div class="empty-envelope-icon" aria-hidden="true">✉</div>
+            <p class="empty-title">Tap a fish to inspect it</p>
+            <p class="empty-sub">Spot the red flags in suspicious emails before they slip away.</p>
+          </div>
+        </aside>
+      </div>
+
+      <div class="console-divider stippled-band" aria-hidden="true"></div>
+
+      <footer class="console-deck">
+        <div class="collection-group">
+          <span class="deck-label" id="collection-label">Your collection</span>
+          <div class="collection-slots" role="list" aria-labelledby="collection-label">
+            <div class="slot slot-empty" role="listitem" aria-label="Empty collection slot 1">?</div>
+            <div class="slot slot-empty" role="listitem" aria-label="Empty collection slot 2">?</div>
+            <div class="slot slot-empty" role="listitem" aria-label="Empty collection slot 3">?</div>
+            <div class="slot slot-empty" role="listitem" aria-label="Empty collection slot 4">?</div>
+            <div class="slot slot-empty" role="listitem" aria-label="Empty collection slot 5">?</div>
+            <div class="slot slot-empty" role="listitem" aria-label="Empty collection slot 6">?</div>
+            <div class="slot slot-empty" role="listitem" aria-label="Empty collection slot 7">?</div>
+            <div class="slot slot-empty" role="listitem" aria-label="Empty collection slot 8">?</div>
+          </div>
+        </div>
+
+        <div class="deck-controls">
+          <a href="collection.html" class="pill-btn field-guide-btn">Field guide</a>
+          <div class="power-switch" role="img" aria-label="Console power switch indicator">
+            <span class="switch-rocker"></span>
+            <span class="switch-line"></span>
+          </div>
+        </div>
+      </footer>
+    </section>
+
+    <div class="console-base stippled-band" aria-hidden="true"></div>
+    <div class="console-feet" aria-hidden="true">
+      <span class="foot"></span>
+      <span class="foot"></span>
+    </div>
+  </main>
+
+  <script src="js/storage.js"></script>
+  <script src="js/tank.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    // Step 1 placeholder canvas rendering
+    (function renderPlaceholderTank() {
+      const canvas = document.getElementById('tank');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const placeholders = [
+        { x: 95, y: 80, w: 120, h: 58, color: '#D85A30', label: 'Phish #1' },
+        { x: 355, y: 76, w: 118, h: 56, color: '#D4537E', label: 'Phish #2' },
+        { x: 205, y: 215, w: 112, h: 54, color: '#5DCAA5', label: 'Phish #3' },
+        { x: 390, y: 185, w: 165, h: 72, color: '#1B499B', label: 'Whale #4' },
+        { x: 145, y: 310, w: 92, h: 44, color: '#FAC775', label: 'Phish #5' },
+        { x: 465, y: 295, w: 108, h: 50, color: '#7F77DD', label: 'Phish #6' }
+      ];
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Dashed target reticle on first placeholder
+      const target = placeholders[0];
+      ctx.save();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 3.5;
+      ctx.setLineDash([10, 8]);
+      ctx.beginPath();
+      ctx.roundRect(target.x - 16, target.y - 16, target.w + 32, target.h + 32, 18);
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw placeholder rectangles
+      placeholders.forEach((item) => {
+        ctx.save();
+        ctx.fillStyle = item.color;
+        ctx.strokeStyle = '#111318';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.roundRect(item.x, item.y, item.w, item.h, 14);
+        ctx.fill();
+        ctx.stroke();
+
+        // Envelope badge
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(item.x + item.w * 0.34, item.y + item.h * 0.28, item.w * 0.32, item.h * 0.44, 4);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      });
+    })();
+  </script>
+</body>
+</html>

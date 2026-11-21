@@ -1,0 +1,1 @@
+// Step 1 placeholder: Core phishing inspection & scoring logic (implemented in later steps)
