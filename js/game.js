@@ -1,23 +1,37 @@
 /**
  * js/game.js
- * Core inspection, red-flag spotting, scoring, hint, and catch loop
- * for "The Phishing Aquarium".
+ * Core inspection, red-flag spotting, scoring (+300 catch, +100 clean,
+ * +50/s under 20s capped at +200, minus Step 4 penalties), hint,
+ * persistence, New Game confirm, and Tank Cleared results modal.
  */
 (function () {
   const FLAG_POINTS = 100;
-  const CATCH_BONUS = 150;
+  const CATCH_BASE_POINTS = 300;
+  const NO_WRONG_CLICK_BONUS = 100;
+  const SPEED_BONUS_PER_SEC = 50;
+  const SPEED_THRESHOLD_SEC = 20;
+  const SPEED_BONUS_CAP = 200;
   const WRONG_PENALTY = 25;
   const HINT_COST = 50;
 
   const gameState = {
     species: [],
     score: 0,
+    bestScore: 0,
     caughtIds: [],
+    totalTimeSec: 0,
+    correctClicks: 0,
+    wrongClicks: 0,
+    speciesStats: {},
     activeSpecies: null,
+    inspectStartMs: null,
+    fishWrongClicks: 0,
+    fishHintsUsed: 0,
     foundFlagIds: new Set(),
     activeExplanation: null,
     hintedFlagId: null,
     isCatching: false,
+    modalShownForRun: false,
     toastTimer: null
   };
 
@@ -27,7 +41,8 @@
       caughtEl: document.getElementById('caught-display'),
       inspectorEl: document.getElementById('inspector-card'),
       slotsWrap: document.querySelector('.collection-slots'),
-      viewportEl: document.querySelector('.tank-viewport')
+      viewportEl: document.querySelector('.tank-viewport'),
+      deckControlsEl: document.querySelector('.deck-controls')
     };
   }
 
@@ -40,10 +55,105 @@
       .replace(/'/g, '&#39;');
   }
 
+  function persistNow() {
+    if (window.Storage && typeof window.Storage.saveProgress === 'function') {
+      const saved = window.Storage.saveProgress({
+        score: gameState.score,
+        bestScore: Math.max(gameState.bestScore, gameState.score),
+        caughtIds: gameState.caughtIds.slice(),
+        totalTimeSec: gameState.totalTimeSec,
+        correctClicks: gameState.correctClicks,
+        wrongClicks: gameState.wrongClicks,
+        speciesStats: gameState.speciesStats
+      });
+      if (saved && typeof saved.bestScore === 'number') {
+        gameState.bestScore = saved.bestScore;
+      }
+    }
+  }
+
+  function ensureNewGameButton() {
+    const { deckControlsEl } = getEls();
+    if (!deckControlsEl) return;
+
+    let btn = document.getElementById('new-game-btn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'new-game-btn';
+      btn.className = 'pill-btn new-game-btn';
+      btn.textContent = 'New game';
+      btn.setAttribute('aria-label', 'Start a new game and reset current progress');
+
+      const guideBtn = deckControlsEl.querySelector('.field-guide-btn');
+      if (guideBtn) {
+        deckControlsEl.insertBefore(btn, guideBtn);
+      } else {
+        deckControlsEl.prepend(btn);
+      }
+
+      btn.addEventListener('click', handleNewGameClick);
+    }
+  }
+
+  function handleNewGameClick() {
+    const confirmed = window.confirm(
+      'Start a new game? Your current score and caught fish in this run will be reset (your Best Score is kept).'
+    );
+    if (!confirmed) return;
+
+    const resetData = window.Storage && typeof window.Storage.resetProgress === 'function'
+      ? window.Storage.resetProgress()
+      : {
+          score: 0,
+          bestScore: gameState.bestScore,
+          caughtIds: [],
+          totalTimeSec: 0,
+          correctClicks: 0,
+          wrongClicks: 0,
+          speciesStats: {}
+        };
+
+    gameState.score = resetData.score || 0;
+    gameState.bestScore = Math.max(gameState.bestScore, resetData.bestScore || 0);
+    gameState.caughtIds = [];
+    gameState.totalTimeSec = 0;
+    gameState.correctClicks = 0;
+    gameState.wrongClicks = 0;
+    gameState.speciesStats = {};
+    gameState.activeSpecies = null;
+    gameState.inspectStartMs = null;
+    gameState.fishWrongClicks = 0;
+    gameState.fishHintsUsed = 0;
+    gameState.foundFlagIds = new Set();
+    gameState.activeExplanation = null;
+    gameState.hintedFlagId = null;
+    gameState.isCatching = false;
+    gameState.modalShownForRun = false;
+
+    closeTankClearedModal();
+
+    if (window.Tank) {
+      if (typeof window.Tank.setFrozenFish === 'function') {
+        window.Tank.setFrozenFish(null);
+      }
+      if (typeof window.Tank.setCaughtIds === 'function') {
+        window.Tank.setCaughtIds([]);
+      }
+      if (typeof window.Tank.setSpecies === 'function' && gameState.species.length > 0) {
+        window.Tank.setSpecies(gameState.species);
+      }
+    }
+
+    updateHud();
+    renderEmptyInspector();
+    showToast('New aquarium run started!');
+  }
+
   function updateHud() {
     const { scoreEl, caughtEl } = getEls();
     if (scoreEl) {
-      scoreEl.textContent = gameState.score.toLocaleString();
+      scoreEl.textContent = Math.max(0, Math.round(gameState.score)).toLocaleString();
     }
     if (caughtEl) {
       const total = gameState.species.length || 8;
@@ -102,13 +212,9 @@
     }
     gameState.toastTimer = window.setTimeout(() => {
       toast.classList.remove('is-visible');
-    }, 2800);
+    }, 3000);
   }
 
-  /**
-   * Splits a plain-text field into clickable/focusable red-flag buttons
-   * and normal text segments without mutating surrounding characters.
-   */
   function buildSegmentizedHtml(text, redFlags) {
     const raw = String(text || '');
     if (!raw || !Array.isArray(redFlags) || redFlags.length === 0) {
@@ -128,7 +234,6 @@
       }
     });
 
-    // Sort left-to-right and discard overlapping segments
     matches.sort((a, b) => a.start - b.start || b.end - a.end);
     const nonOverlapping = [];
     let cursor = 0;
@@ -278,7 +383,10 @@
   }
 
   function triggerWrongClickFeedback() {
+    gameState.wrongClicks += 1;
+    gameState.fishWrongClicks += 1;
     gameState.score = Math.max(0, gameState.score - WRONG_PENALTY);
+    persistNow();
     updateHud();
 
     const { inspectorEl } = getEls();
@@ -302,6 +410,7 @@
     if (!flag || gameState.foundFlagIds.has(flag.id) || gameState.isCatching) return;
 
     gameState.foundFlagIds.add(flag.id);
+    gameState.correctClicks += 1;
     if (gameState.hintedFlagId === flag.id) {
       gameState.hintedFlagId = null;
     }
@@ -316,6 +425,7 @@
     const totalFlags = (sp && Array.isArray(sp.redFlags) && sp.redFlags.length) || 3;
     const foundCount = sp ? sp.redFlags.filter((f) => gameState.foundFlagIds.has(f.id)).length : 0;
 
+    persistNow();
     updateHud();
     renderInspector();
 
@@ -324,32 +434,93 @@
     }
   }
 
+  function computeCatchBreakdown(elapsedSec, wrongClicksForFish) {
+    const cleanBonus = wrongClicksForFish === 0 ? NO_WRONG_CLICK_BONUS : 0;
+    const secondsUnder = Math.max(0, SPEED_THRESHOLD_SEC - elapsedSec);
+    const speedBonus = Math.min(
+      SPEED_BONUS_CAP,
+      Math.floor(secondsUnder) * SPEED_BONUS_PER_SEC
+    );
+    const totalCatchAward = CATCH_BASE_POINTS + cleanBonus + speedBonus;
+    return {
+      base: CATCH_BASE_POINTS,
+      cleanBonus,
+      speedBonus,
+      totalCatchAward
+    };
+  }
+
   function completeCatch(species) {
     if (!species || gameState.isCatching) return;
     gameState.isCatching = true;
+
+    const elapsedSec = gameState.inspectStartMs
+      ? Math.max(0.1, (performance.now() - gameState.inspectStartMs) / 1000)
+      : 10;
+
+    const breakdown = computeCatchBreakdown(elapsedSec, gameState.fishWrongClicks);
+    gameState.score += breakdown.totalCatchAward;
+    gameState.bestScore = Math.max(gameState.bestScore, gameState.score);
+    gameState.totalTimeSec += elapsedSec;
 
     const slotIndex = gameState.caughtIds.length;
     if (!gameState.caughtIds.includes(species.id)) {
       gameState.caughtIds.push(species.id);
     }
-    gameState.score += CATCH_BONUS;
 
-    if (window.Storage && typeof window.Storage.saveProgress === 'function') {
-      window.Storage.saveProgress({
-        score: gameState.score,
-        caughtIds: gameState.caughtIds.slice()
+    const prevStat = gameState.speciesStats[species.id] || {
+      caught: false,
+      caughtCount: 0,
+      bestTimeSec: null,
+      lastTimeSec: null,
+      wrongClicks: 0,
+      hintsUsed: 0,
+      lastPoints: 0,
+      lastCaughtAt: null
+    };
+
+    gameState.speciesStats[species.id] = {
+      caught: true,
+      caughtCount: prevStat.caughtCount + 1,
+      bestTimeSec: prevStat.bestTimeSec == null
+        ? elapsedSec
+        : Math.min(prevStat.bestTimeSec, elapsedSec),
+      lastTimeSec: elapsedSec,
+      wrongClicks: gameState.fishWrongClicks,
+      hintsUsed: gameState.fishHintsUsed,
+      lastPoints: breakdown.totalCatchAward + (species.redFlags ? species.redFlags.length * FLAG_POINTS : 300),
+      lastCaughtAt: new Date().toISOString()
+    };
+
+    if (window.Storage && typeof window.Storage.recordSpeciesCatch === 'function') {
+      window.Storage.recordSpeciesCatch(species.id, {
+        elapsedSec,
+        wrongClicks: gameState.fishWrongClicks,
+        hintsUsed: gameState.fishHintsUsed,
+        pointsEarned: gameState.speciesStats[species.id].lastPoints
       });
     }
+    persistNow();
 
     updateHud();
-    showToast(`Caught ${species.name}! +${CATCH_BONUS} bonus pts`);
+
+    const bonusParts = [`+${breakdown.base}`];
+    if (breakdown.cleanBonus > 0) bonusParts.push(`+${breakdown.cleanBonus} clean`);
+    if (breakdown.speedBonus > 0) bonusParts.push(`+${breakdown.speedBonus} speed`);
+    showToast(`Caught ${species.name}! (${bonusParts.join(', ')})`);
 
     if (window.Tank && typeof window.Tank.playCatchAnimation === 'function') {
       window.Tank.playCatchAnimation(species.id, slotIndex);
     }
 
+    const totalSpecies = gameState.species.length || 8;
+    const allCaught = gameState.caughtIds.length >= totalSpecies;
+
     window.setTimeout(() => {
       gameState.activeSpecies = null;
+      gameState.inspectStartMs = null;
+      gameState.fishWrongClicks = 0;
+      gameState.fishHintsUsed = 0;
       gameState.foundFlagIds = new Set();
       gameState.activeExplanation = null;
       gameState.hintedFlagId = null;
@@ -358,7 +529,114 @@
         window.Tank.setFrozenFish(null);
       }
       renderEmptyInspector();
+
+      if (allCaught && !gameState.modalShownForRun) {
+        gameState.modalShownForRun = true;
+        openTankClearedModal();
+      }
     }, 680);
+  }
+
+  function getRankTitle(accuracyPct, finalScore) {
+    if (accuracyPct >= 90 && finalScore >= 3200) return 'Apex Predator';
+    if (accuracyPct >= 75 && finalScore >= 2200) return 'Phish Hunter';
+    if (accuracyPct >= 50 && finalScore >= 1200) return 'Angler';
+    return 'Minnow';
+  }
+
+  function formatDuration(sec) {
+    const rounded = Math.max(0, Math.round(sec));
+    const mins = Math.floor(rounded / 60);
+    const rem = rounded % 60;
+    return mins > 0 ? `${mins}m ${rem}s` : `${rem}s`;
+  }
+
+  function closeTankClearedModal() {
+    const existing = document.getElementById('tank-cleared-modal');
+    if (existing) {
+      existing.remove();
+    }
+  }
+
+  function openTankClearedModal() {
+    closeTankClearedModal();
+
+    const totalAttempts = gameState.correctClicks + gameState.wrongClicks;
+    const accuracyPct = totalAttempts > 0
+      ? Math.round((gameState.correctClicks / totalAttempts) * 100)
+      : 100;
+    const rank = getRankTitle(accuracyPct, gameState.score);
+    const formattedTime = formatDuration(gameState.totalTimeSec);
+
+    const modal = document.createElement('div');
+    modal.id = 'tank-cleared-modal';
+    modal.className = 'cleared-modal-backdrop';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'cleared-modal-title');
+
+    modal.innerHTML = `
+      <div class="cleared-modal-card">
+        <div class="cleared-badge">ALL 8 SPECIES CAUGHT</div>
+        <h2 id="cleared-modal-title" class="cleared-title">Tank Cleared!</h2>
+        <p class="cleared-rank-line">Rank Achieved: <strong class="cleared-rank">${escapeHtml(rank)}</strong></p>
+
+        <div class="cleared-stats-grid">
+          <div class="cleared-stat">
+            <span class="cleared-stat-label">Final Score</span>
+            <strong class="cleared-stat-value">${Math.max(0, Math.round(gameState.score)).toLocaleString()}</strong>
+          </div>
+          <div class="cleared-stat">
+            <span class="cleared-stat-label">Best Score</span>
+            <strong class="cleared-stat-value">${Math.max(0, Math.round(gameState.bestScore)).toLocaleString()}</strong>
+          </div>
+          <div class="cleared-stat">
+            <span class="cleared-stat-label">Total Time</span>
+            <strong class="cleared-stat-value">${escapeHtml(formattedTime)}</strong>
+          </div>
+          <div class="cleared-stat">
+            <span class="cleared-stat-label">Accuracy</span>
+            <strong class="cleared-stat-value">${accuracyPct}%</strong>
+          </div>
+        </div>
+
+        <div class="cleared-actions">
+          <button type="button" id="play-again-btn" class="pill-btn cleared-play-btn">Play again</button>
+          <a href="collection.html" class="pill-btn field-guide-btn">View Field Guide</a>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const playAgainBtn = document.getElementById('play-again-btn');
+    if (playAgainBtn) {
+      playAgainBtn.focus();
+      playAgainBtn.addEventListener('click', () => {
+        closeTankClearedModal();
+        const resetData = window.Storage && typeof window.Storage.resetProgress === 'function'
+          ? window.Storage.resetProgress()
+          : { score: 0, bestScore: gameState.bestScore, caughtIds: [], totalTimeSec: 0, correctClicks: 0, wrongClicks: 0, speciesStats: {} };
+
+        gameState.score = resetData.score || 0;
+        gameState.bestScore = Math.max(gameState.bestScore, resetData.bestScore || 0);
+        gameState.caughtIds = [];
+        gameState.totalTimeSec = 0;
+        gameState.correctClicks = 0;
+        gameState.wrongClicks = 0;
+        gameState.speciesStats = {};
+        gameState.modalShownForRun = false;
+
+        if (window.Tank) {
+          if (typeof window.Tank.setCaughtIds === 'function') window.Tank.setCaughtIds([]);
+          if (typeof window.Tank.setSpecies === 'function' && gameState.species.length > 0) {
+            window.Tank.setSpecies(gameState.species);
+          }
+        }
+        updateHud();
+        renderEmptyInspector();
+      });
+    }
   }
 
   function handleHintClick() {
@@ -369,7 +647,9 @@
     const unfound = flags.filter((f) => !gameState.foundFlagIds.has(f.id));
     if (unfound.length === 0) return;
 
+    gameState.fishHintsUsed += 1;
     gameState.score = Math.max(0, gameState.score - HINT_COST);
+
     const chosen = gameState.hintedFlagId && unfound.some((f) => f.id === gameState.hintedFlagId)
       ? unfound.find((f) => f.id === gameState.hintedFlagId)
       : unfound[0];
@@ -377,9 +657,10 @@
     gameState.hintedFlagId = chosen.id;
     gameState.activeExplanation = {
       kind: 'hint active',
-      explanation: `Pulsing an unfound red flag in the email (${HINT_COST} pts). Click the glowing highlight to inspect it!`
+      explanation: `Pulsing an unfound red flag in the email (-${HINT_COST} pts). Click the glowing highlight to inspect it!`
     };
 
+    persistNow();
     updateHud();
     renderInspector();
   }
@@ -407,7 +688,6 @@
       });
     });
 
-    // Clicking non-flag email text costs 25 points and shakes
     const emailSheet = inspectorEl.querySelector('.email-sheet');
     if (emailSheet) {
       emailSheet.addEventListener('click', (e) => {
@@ -423,6 +703,9 @@
     if (gameState.caughtIds.includes(species.id)) return;
 
     gameState.activeSpecies = species;
+    gameState.inspectStartMs = performance.now();
+    gameState.fishWrongClicks = 0;
+    gameState.fishHintsUsed = 0;
     gameState.foundFlagIds = new Set();
     gameState.activeExplanation = null;
     gameState.hintedFlagId = null;
@@ -470,13 +753,18 @@
   }
 
   async function initGame() {
+    ensureNewGameButton();
+
     if (window.Storage && typeof window.Storage.loadProgress === 'function') {
       const saved = window.Storage.loadProgress();
-      if (saved && typeof saved.score === 'number') {
-        gameState.score = saved.score;
-      }
-      if (saved && Array.isArray(saved.caughtIds)) {
-        gameState.caughtIds = saved.caughtIds.slice();
+      if (saved) {
+        gameState.score = saved.score || 0;
+        gameState.bestScore = saved.bestScore || 0;
+        gameState.caughtIds = Array.isArray(saved.caughtIds) ? saved.caughtIds.slice() : [];
+        gameState.totalTimeSec = saved.totalTimeSec || 0;
+        gameState.correctClicks = saved.correctClicks || 0;
+        gameState.wrongClicks = saved.wrongClicks || 0;
+        gameState.speciesStats = saved.speciesStats || {};
       }
     }
 
@@ -501,6 +789,12 @@
     }
 
     renderEmptyInspector();
+
+    const totalSpecies = gameState.species.length || 8;
+    if (gameState.caughtIds.length >= totalSpecies && !gameState.modalShownForRun) {
+      gameState.modalShownForRun = true;
+      openTankClearedModal();
+    }
   }
 
   if (document.readyState === 'loading') {

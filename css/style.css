@@ -244,7 +244,6 @@ body {
   outline-offset: 2px;
 }
 
-/* Success Catch Toast */
 .catch-toast {
   position: absolute;
   top: 16px;
@@ -257,11 +256,12 @@ body {
   border: var(--outline-medium) solid var(--ink-black);
   border-radius: var(--radius-pill);
   font-family: var(--font-heading);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 700;
   box-shadow: 0 4px 0 var(--ink-black);
   opacity: 0;
   pointer-events: none;
+  white-space: nowrap;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -270,7 +270,6 @@ body {
   transform: translate(-50%, 0);
 }
 
-/* Overlaid Email Inspector Sticker */
 .inspector-card {
   position: absolute;
   top: 16px;
@@ -388,7 +387,6 @@ body {
   cursor: not-allowed;
 }
 
-/* 3-Segment Flag Progress Bar */
 .flag-progress-wrap {
   display: flex;
   align-items: center;
@@ -422,7 +420,6 @@ body {
   white-space: nowrap;
 }
 
-/* Email Sheet & Interactive Flag Tokens */
 .email-sheet {
   background-color: #F9FAFC;
   border: 2px solid var(--ink-black);
@@ -485,7 +482,6 @@ body {
   background-color: #EFF6FF;
 }
 
-/* Clickable / Focusable Red Flag Buttons */
 .flag-token {
   appearance: none;
   -webkit-appearance: none;
@@ -533,7 +529,6 @@ body {
   }
 }
 
-/* Explanation Tooltip Card */
 .flag-explanation-card {
   background-color: var(--flag-bg);
   color: var(--flag-text);
@@ -636,8 +631,9 @@ body {
 
 .deck-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   margin-left: auto;
 }
 
@@ -645,16 +641,17 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 22px;
+  padding: 10px 20px;
   background-color: var(--card-white);
   color: var(--ink-black);
   text-decoration: none;
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   border: var(--outline-thick) solid var(--ink-black);
   border-radius: var(--radius-pill);
   box-shadow: 0 3px 0 var(--ink-black);
+  cursor: pointer;
   transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
@@ -665,6 +662,10 @@ body {
 
 .pill-btn:active {
   transform: translateY(1px);
+}
+
+.new-game-btn {
+  background-color: #F4F3EF;
 }
 
 .power-switch {
@@ -718,6 +719,102 @@ body {
   border: 2.5px solid var(--ink-black);
   border-top: none;
   border-radius: 0 0 8px 8px;
+}
+
+/* Tank Cleared Full-Screen Results Modal */
+.cleared-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: rgba(8, 13, 22, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.cleared-modal-card {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--card-white);
+  color: var(--text-primary);
+  border: var(--outline-thick) solid var(--ink-black);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: 8px 10px 0 var(--ink-black);
+  text-align: center;
+}
+
+.cleared-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent-teal);
+  color: var(--ink-black);
+  border: 2px solid var(--ink-black);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-2);
+}
+
+.cleared-title {
+  margin: 0 0 6px;
+  font-family: var(--font-heading);
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--ink-black);
+}
+
+.cleared-rank-line {
+  margin: 0 0 var(--space-4);
+  font-size: 0.98rem;
+  color: var(--text-muted);
+}
+
+.cleared-rank {
+  color: var(--ocean-deep);
+  font-family: var(--font-heading);
+}
+
+.cleared-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: var(--space-5);
+}
+
+.cleared-stat {
+  background-color: #F4F5F8;
+  border: 2px solid var(--ink-black);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.cleared-stat-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.cleared-stat-value {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink-black);
+}
+
+.cleared-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.cleared-play-btn {
+  background-color: var(--accent-teal);
 }
 
 /* Collection & Field Guide Page */
