@@ -4,8 +4,6 @@ A tank full of swimming "emails". Spot the red flags, catch the phish, and fill 
 
 ![The Phishing Aquarium screenshot](docs/screenshot.png)
 
-> Replace `docs/screenshot.png` with a screenshot of the game (create a `docs/` folder and drop the image in).
-
 **Play it live:** https://abinethra.github.io/phishing-aquarium/
 
 ---
