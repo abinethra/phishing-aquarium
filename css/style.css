@@ -28,7 +28,7 @@
 
   /* Red Flag Highlighting */
   --flag-bg: #F7C1C1;
-  --flag-text: #7A1414;
+  --flag-text: #501313;
 
   /* Typography */
   --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -96,7 +96,6 @@ body {
   z-index: 0;
 }
 
-/* Soft Page Vignette */
 .vignette-overlay {
   position: fixed;
   inset: 0;
@@ -180,7 +179,6 @@ body {
   position: relative;
 }
 
-/* Halftone Dot Texture Bands */
 .stippled-band {
   height: 15px;
   width: 100%;
@@ -208,7 +206,7 @@ body {
 .tank-viewport {
   position: relative;
   width: 100%;
-  height: 460px;
+  height: 470px;
   border: var(--outline-thick) solid var(--ink-black);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -264,7 +262,8 @@ body {
 #tank:focus-visible,
 .pill-btn:focus-visible,
 .species-card:focus-visible,
-.flag-token:focus-visible,
+.mail-word:focus-visible,
+.mail-action-link:focus-visible,
 .hint-btn:focus-visible,
 .onboarding-dismiss-btn:focus-visible {
   outline: 3px solid var(--accent-teal);
@@ -357,32 +356,32 @@ body {
   line-height: 1.35;
 }
 
-/* Overlaid Email Inspector Sticker */
+/* Overlaid Email Inspector Sticker (Internally Scrollable) */
 .inspector-card {
   position: absolute;
-  top: 16px;
-  right: 18px;
+  top: 14px;
+  right: 16px;
   z-index: 4;
-  width: 318px;
-  max-height: 428px;
+  width: 368px;
+  max-height: 442px;
   overflow-y: auto;
   background-color: var(--card-white);
   color: var(--text-primary);
   border: var(--outline-thick) solid var(--ink-black);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 13px;
   box-shadow: var(--shadow-sticker);
-  transform: rotate(1.6deg);
+  transform: rotate(1.2deg);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
 }
 
 .inspector-card.is-empty {
-  min-height: 318px;
+  min-height: 310px;
   justify-content: center;
-  transform: rotate(2.4deg);
+  transform: rotate(2deg);
 }
 
 .inspector-card.is-popping {
@@ -391,13 +390,13 @@ body {
 
 @keyframes inspectorBounce {
   0% {
-    transform: rotate(1.6deg) scale(0.93);
+    transform: rotate(1.2deg) scale(0.93);
   }
   65% {
-    transform: rotate(1.6deg) scale(1.025);
+    transform: rotate(1.2deg) scale(1.025);
   }
   100% {
-    transform: rotate(1.6deg) scale(1);
+    transform: rotate(1.2deg) scale(1);
   }
 }
 
@@ -474,7 +473,7 @@ body {
 
 .inspector-species-name {
   font-family: var(--font-heading);
-  font-size: 0.95rem;
+  font-size: 0.94rem;
   font-weight: 700;
   color: var(--ink-black);
   white-space: nowrap;
@@ -489,7 +488,7 @@ body {
   background-color: var(--accent-amber);
   color: var(--ink-black);
   font-family: var(--font-body);
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   font-weight: 700;
   box-shadow: 0 2px 0 var(--ink-black);
   cursor: pointer;
@@ -541,175 +540,273 @@ body {
 }
 
 .flag-progress-label {
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
 }
 
+/* Mail Client Viewer */
 .email-sheet {
-  background-color: #F9FAFC;
+  background-color: #FAFBFD;
   border: 2px solid var(--ink-black);
   border-radius: var(--radius-sm);
   padding: 10px 11px;
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: 0.79rem;
+  line-height: 1.52;
   color: var(--text-primary);
 }
 
-.email-sheet.is-shaking {
-  animation: emailShake 0.34s ease;
+.mail-headers {
+  padding-bottom: 7px;
+  margin-bottom: 7px;
+  border-bottom: 1.5px solid #D8DCE6;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-@keyframes emailShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
+.mail-header-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.76rem;
+  line-height: 1.4;
 }
 
-.email-row {
-  margin-bottom: 5px;
+.mail-header-key {
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 52px;
+  flex-shrink: 0;
+}
+
+.mail-header-val {
+  color: var(--text-primary);
   word-break: break-word;
 }
 
-.email-field-label {
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-right: 4px;
-}
-
-.email-addr {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-}
-
-.email-subject {
+.mail-from-name {
   font-weight: 600;
 }
 
-.email-body-copy {
-  margin-top: 7px;
+.mail-from-addr {
+  color: var(--text-muted);
+  font-size: 0.73rem;
+}
+
+.mail-date {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.mail-subject {
+  font-weight: 700;
+  color: var(--ink-black);
+}
+
+.mail-body-container {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.mail-para {
+  margin: 0;
+}
+
+.mail-attachment-row {
+  margin-top: 8px;
   padding-top: 7px;
   border-top: 1px dashed #CBD2DF;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.74rem;
 }
 
-.email-cta-row {
-  margin-top: 8px;
+.mail-attachment-label {
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
-.email-fake-link {
+.mail-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background-color: #EEF1F6;
+  border: 1px solid #9AA3B5;
+  color: var(--text-primary);
+  font-size: 0.73rem;
+}
+
+.mail-link-wrap {
+  margin-top: 9px;
+}
+
+.mail-action-link {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 5px 12px;
   border-radius: 6px;
   border: 1.5px solid #1E40AF;
-  color: #1E3A8A;
-  font-weight: 600;
   background-color: #EFF6FF;
-}
-
-.flag-token {
-  appearance: none;
-  -webkit-appearance: none;
-  display: inline;
-  padding: 1px 4px;
-  margin: 0 1px;
-  border-radius: 5px;
-  border: 1.5px dashed rgba(122, 20, 20, 0.42);
-  background-color: transparent;
-  color: inherit;
-  font: inherit;
-  font-weight: inherit;
-  line-height: inherit;
+  color: #1E3A8A;
+  font-family: var(--font-body);
+  font-size: 0.77rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+  transition: background-color 0.14s ease, transform 0.14s ease;
 }
 
-.flag-token:hover {
-  background-color: rgba(247, 193, 193, 0.48);
-  border-style: solid;
-  border-color: var(--flag-text);
+.mail-action-link:hover {
+  background-color: #DBEAFE;
   transform: translateY(-1px);
 }
 
-.flag-token:active {
-  transform: scale(0.97);
+.mail-signature {
+  margin-top: 9px;
+  padding-top: 7px;
+  border-top: 1px dashed #CBD2DF;
+  font-size: 0.75rem;
+  color: var(--text-primary);
 }
 
-.flag-token.is-found {
-  background-color: var(--flag-bg);
-  color: var(--flag-text);
-  border: 1.5px solid var(--flag-text);
+.mail-footer {
+  margin-top: 8px;
+  font-size: 0.69rem;
+  line-height: 1.35;
+  color: #6B7280;
+}
+
+.mail-url-status {
+  margin-top: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background-color: #ECEFF4;
+  border: 1px solid #C6CDD8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  color: #2D3340;
+  word-break: break-all;
+}
+
+/* Word-by-word clickable spans: normal text until hover or found */
+.mail-word {
+  display: inline;
+  padding: 0 1px;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.12s ease, text-decoration-color 0.12s ease;
+}
+
+.mail-word:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
+}
+
+.mail-word.is-wrong-tried {
+  color: #6B7280;
+  cursor: default;
+}
+
+.mail-word.is-wrong-tried:hover {
+  text-decoration: none;
+}
+
+.mail-word.is-word-shaking {
+  color: #991B1B;
+  animation: wordShake 0.3s ease;
+}
+
+@keyframes wordShake {
+  0%, 100% { transform: translateX(0); display: inline-block; }
+  25% { transform: translateX(-4px); display: inline-block; }
+  50% { transform: translateX(4px); display: inline-block; }
+  75% { transform: translateX(-2px); display: inline-block; }
+}
+
+.mail-word.is-hint-target {
+  background-color: rgba(250, 199, 117, 0.45);
+  border-bottom: 2px dashed #B45309;
+}
+
+.mail-flag-found {
+  display: inline;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background-color: #F7C1C1;
+  color: #501313;
   font-weight: 700;
+  border: 1.5px solid #501313;
 }
 
-.flag-token.is-stamped {
+.mail-flag-found.is-stamped {
   animation: flagStamp 0.28s cubic-bezier(0.2, 1.45, 0.35, 1) both;
 }
 
 @keyframes flagStamp {
   0% {
-    transform: scale(1.24) rotate(-2deg);
+    transform: scale(1.2);
   }
   70% {
-    transform: scale(0.96) rotate(0.5deg);
+    transform: scale(0.96);
   }
   100% {
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-.flag-token.is-hinted {
-  background-color: rgba(247, 193, 193, 0.65);
-  border: 2px solid var(--flag-text);
-  animation: flagPulse 0.95s ease-in-out infinite;
-}
-
-@keyframes flagPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(216, 90, 48, 0.55);
     transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 0 5px rgba(216, 90, 48, 0);
-    transform: scale(1.03);
   }
 }
 
 .flag-explanation-card {
-  background-color: var(--flag-bg);
-  color: var(--flag-text);
+  background-color: #F7C1C1;
+  color: #501313;
   border: 2px solid var(--ink-black);
   border-radius: var(--radius-sm);
-  padding: 9px 11px;
+  padding: 8px 10px;
   animation: flagStamp 0.24s ease-out;
+}
+
+.flag-explanation-card.is-wrong-note {
+  background-color: #F3F4F6;
+  color: #1F2937;
 }
 
 .explanation-badge {
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: 0.67rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 1px 7px;
   border-radius: var(--radius-pill);
   background-color: var(--card-white);
-  color: var(--flag-text);
-  border: 1.5px solid var(--flag-text);
-  margin-bottom: 4px;
+  color: #501313;
+  border: 1.5px solid #501313;
+  margin-bottom: 3px;
+}
+
+.flag-explanation-card.is-wrong-note .explanation-badge {
+  color: #374151;
+  border-color: #4B5563;
 }
 
 .explanation-text {
   margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.42;
+  font-size: 0.77rem;
+  line-height: 1.4;
   font-weight: 500;
 }
 
 .inspector-hint-copy {
   margin: 0;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
   text-align: center;
 }
@@ -1158,7 +1255,8 @@ body {
   .inspector-card {
     position: static;
     width: 100%;
-    max-height: none;
+    max-height: 390px;
+    overflow-y: auto;
     min-height: 150px;
     margin-top: var(--space-3);
     transform: rotate(0deg);
@@ -1207,9 +1305,8 @@ body {
 /* Accessibility: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .wave-svg,
-  .email-sheet.is-shaking,
-  .flag-token.is-hinted,
-  .flag-token.is-stamped,
+  .mail-word.is-word-shaking,
+  .mail-flag-found.is-stamped,
   .inspector-card.is-popping,
   .onboarding-sticker,
   .slot-caught,
@@ -1221,7 +1318,8 @@ body {
   .species-card,
   .pill-btn,
   .hint-btn,
-  .flag-token,
+  .mail-word,
+  .mail-action-link,
   .flag-seg,
   .catch-toast {
     transition: none;
