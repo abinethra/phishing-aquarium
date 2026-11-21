@@ -817,7 +817,7 @@ body {
   background-color: var(--accent-teal);
 }
 
-/* Collection & Field Guide Page */
+/* Collection & Field Guide Sticker Cards */
 .field-guide-console {
   padding-bottom: var(--space-4);
 }
@@ -866,6 +866,7 @@ body {
 }
 
 .species-card {
+  --sticker-tilt: 0deg;
   background-color: var(--card-white);
   color: var(--text-primary);
   border: var(--outline-thick) solid var(--ink-black);
@@ -875,15 +876,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  transition: transform 0.18s ease;
-}
-
-.species-card:nth-child(odd) {
-  transform: rotate(-0.8deg);
-}
-
-.species-card:nth-child(even) {
-  transform: rotate(0.8deg);
+  transform: rotate(var(--sticker-tilt));
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .species-card:hover {
@@ -891,7 +885,9 @@ body {
 }
 
 .species-card.is-locked {
-  background-color: #F4F3EF;
+  background-color: rgba(255, 255, 255, 0.55);
+  border: var(--outline-thick) dashed var(--ink-black);
+  box-shadow: none;
 }
 
 .card-top-row {
@@ -914,19 +910,38 @@ body {
   border: 1.5px solid var(--ink-black);
 }
 
+.species-status.is-caught-status {
+  background-color: var(--accent-teal);
+  color: var(--ink-black);
+}
+
 .species-silhouette {
-  height: 76px;
+  height: 84px;
   margin: var(--space-1) 0;
-  border: var(--outline-medium) dashed #8E929E;
   border-radius: var(--radius-sm);
-  background-color: #E9E7DF;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.species-silhouette.locked-slot {
+  border: var(--outline-medium) dashed var(--ink-black);
+  background-color: #EAE8E0;
   font-family: var(--font-heading);
-  font-size: 1.75rem;
+  font-size: 1.85rem;
   font-weight: 700;
-  color: #7B808C;
+  color: var(--text-muted);
+}
+
+.species-silhouette.is-caught-artwork {
+  background-color: #F4F7FC;
+  border: 2px solid var(--ink-black);
+}
+
+.sticker-fish-svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 .species-name {

@@ -38,10 +38,10 @@
           <h2 class="guide-heading">Phishing Species Field Guide</h2>
           <p class="guide-subtitle">Catch suspicious envelope fish in the tank to unlock their anatomy and red-flag profiles.</p>
         </div>
-        <span class="guide-progress-badge">0 of 8 Discovered</span>
+        <span id="guide-progress-badge" class="guide-progress-badge">0 of 8 Discovered</span>
       </div>
 
-      <div class="species-grid" role="list">
+      <div id="species-grid" class="species-grid" role="list">
         <article class="species-card is-locked" role="listitem" aria-label="Locked species 1">
           <div class="card-top-row">
             <span class="species-number">#01</span>
@@ -158,5 +158,178 @@
   </main>
 
   <script src="js/storage.js"></script>
+  <script>
+    (function renderFieldGuideStickers() {
+      const FALLBACK_SPECIES = [
+        { id: 'bulk-phish', name: 'Bulk Phish', type: 'Mass Blast Scam', colour: '#D85A30', shape: 'classic', difficulty: 1 },
+        { id: 'spear-phish', name: 'Spear Phish', type: 'Targeted Lure', colour: '#D4537E', shape: 'classic', difficulty: 2 },
+        { id: 'whale-ceo-fraud', name: 'Whale (CEO fraud)', type: 'Executive Impersonation', colour: '#5DCAA5', shape: 'round', difficulty: 3 },
+        { id: 'clone-phish', name: 'Clone Phish', type: 'Duplicated Message', colour: '#7F77DD', shape: 'classic', difficulty: 2 },
+        { id: 'invoice-eel', name: 'Invoice Eel', type: 'Fake Billing Lure', colour: '#FAC775', shape: 'long', difficulty: 2 },
+        { id: 'delivery-dart', name: 'Delivery Dart', type: 'Package Tracking Scam', colour: '#5DCAA5', shape: 'spiky', difficulty: 1 },
+        { id: 'fake-login-ray', name: 'Fake Login Ray', type: 'Credential Harvester', colour: '#7F77DD', shape: 'spiky', difficulty: 2 },
+        { id: 'tech-support-crab', name: 'Tech Support Crab', type: 'IT Helpdesk Scam', colour: '#D85A30', shape: 'round', difficulty: 3 }
+      ];
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // Deterministic pseudo-random rotation in [-2, 2] deg per card index
+      function getStickerTilt(idx) {
+        const angles = [-1.8, 1.5, -1.2, 1.9, -1.5, 1.3, -1.9, 1.6];
+        return angles[idx % angles.length];
+      }
+
+      function renderSpeciesArtworkSvg(species) {
+        const colour = escapeHtml(species.colour || '#D85A30');
+        const isWhale = species.id === 'whale-ceo-fraud' || /whale/i.test(species.name || '');
+        const shape = species.shape || 'classic';
+
+        let bodyMarkup = '';
+        if (isWhale) {
+          bodyMarkup = `
+            <path d="M 38 42 C 52 20, 118 22, 146 38 C 154 44, 150 58, 124 62 L 62 60 C 46 58, 38 50, 38 42 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <path d="M 40 38 L 20 26 L 26 42 L 20 56 L 40 46 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <circle cx="72" cy="34" r="3" fill="#FFFFFF" />
+            <circle cx="88" cy="30" r="2.6" fill="#FFFFFF" />
+            <circle cx="104" cy="33" r="3.2" fill="#FFFFFF" />
+            <circle cx="120" cy="36" r="2.6" fill="#FFFFFF" />
+            <circle cx="80" cy="46" r="2.8" fill="#FFFFFF" />
+            <circle cx="98" cy="46" r="3" fill="#FFFFFF" />
+            <circle cx="114" cy="48" r="2.5" fill="#FFFFFF" />
+          `;
+        } else if (shape === 'long') {
+          bodyMarkup = `
+            <path d="M 34 42 C 56 26, 124 28, 148 42 C 124 56, 56 58, 34 42 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <path d="M 36 39 L 18 29 L 23 42 L 18 55 L 36 45 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <rect x="86" y="29" width="11" height="26" fill="#FFFFFF" stroke="#111318" stroke-width="2.2" />
+          `;
+        } else if (shape === 'round') {
+          bodyMarkup = `
+            <path d="M 42 42 C 54 18, 114 20, 134 42 C 114 64, 54 66, 42 42 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <path d="M 44 38 L 26 27 L 31 42 L 26 57 L 44 46 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <rect x="82" y="24" width="12" height="36" fill="#FFFFFF" stroke="#111318" stroke-width="2.2" />
+          `;
+        } else if (shape === 'spiky') {
+          bodyMarkup = `
+            <polygon points="40,42 64,23 80,16 102,25 136,42 102,59 80,68 64,61" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <path d="M 42 38 L 24 27 L 29 42 L 24 57 L 42 46 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <rect x="82" y="24" width="12" height="36" fill="#FFFFFF" stroke="#111318" stroke-width="2.2" />
+          `;
+        } else {
+          bodyMarkup = `
+            <path d="M 40 42 C 58 21, 112 22, 136 42 C 112 62, 58 63, 40 42 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <path d="M 42 38 L 24 27 L 29 42 L 24 57 L 42 46 Z" fill="${colour}" stroke="#111318" stroke-width="3" stroke-linejoin="round" />
+            <rect x="82" y="24" width="12" height="36" fill="#FFFFFF" stroke="#111318" stroke-width="2.2" />
+          `;
+        }
+
+        const eyeX = isWhale ? 132 : 116;
+        const eyeY = isWhale ? 40 : 39;
+        const envX = isWhale ? 88 : 98;
+        const envY = isWhale ? 38 : 34;
+
+        return `
+          <svg class="sticker-fish-svg" viewBox="0 0 170 84" width="170" height="84" aria-hidden="true">
+            ${bodyMarkup}
+            <circle cx="${eyeX}" cy="${eyeY}" r="6" fill="#FFFFFF" stroke="#111318" stroke-width="2.5" />
+            <circle cx="${eyeX + 1.8}" cy="${eyeY}" r="2.6" fill="#111318" />
+            <rect x="${envX}" y="${envY}" width="22" height="15" rx="2.5" fill="#FFFFFF" stroke="#111318" stroke-width="2.2" />
+            <polyline points="${envX + 1.5},${envY + 1.5} ${envX + 11},${envY + 9} ${envX + 20.5},${envY + 1.5}" fill="none" stroke="#111318" stroke-width="2" />
+          </svg>
+        `;
+      }
+
+      async function loadSpecies() {
+        try {
+          const res = await fetch('data/phish.json');
+          if (res.ok) {
+            const json = await res.json();
+            if (Array.isArray(json) && json.length > 0) return json;
+          }
+        } catch (_) {
+          // Fallback when opened directly
+        }
+        return FALLBACK_SPECIES;
+      }
+
+      async function initGuide() {
+        const gridEl = document.getElementById('species-grid');
+        if (!gridEl) return;
+
+        let saved = { score: 0, caughtIds: [] };
+        if (window.Storage && typeof window.Storage.loadProgress === 'function') {
+          saved = window.Storage.loadProgress();
+        }
+
+        const speciesList = await loadSpecies();
+        const caughtSet = new Set(Array.isArray(saved.caughtIds) ? saved.caughtIds : []);
+
+        const scoreEl = document.getElementById('score-display');
+        const caughtEl = document.getElementById('caught-display');
+        const badgeEl = document.getElementById('guide-progress-badge');
+
+        if (scoreEl) scoreEl.textContent = Number(saved.score || 0).toLocaleString();
+        if (caughtEl) caughtEl.textContent = `${caughtSet.size} / ${speciesList.length}`;
+        if (badgeEl) badgeEl.textContent = `${caughtSet.size} of ${speciesList.length} Discovered`;
+
+        gridEl.innerHTML = speciesList.slice(0, 8).map((sp, idx) => {
+          const num = String(idx + 1).padStart(2, '0');
+          const tilt = getStickerTilt(idx);
+          const isCaught = caughtSet.has(sp.id);
+
+          if (!isCaught) {
+            return `
+              <article class="species-card is-locked" role="listitem" style="--sticker-tilt: ${tilt}deg;" aria-label="Locked species ${num}">
+                <div class="card-top-row">
+                  <span class="species-number">#${num}</span>
+                  <span class="species-status">Locked</span>
+                </div>
+                <div class="species-silhouette locked-slot" aria-hidden="true">?</div>
+                <h3 class="species-name">Unknown Species</h3>
+                <p class="species-desc">Catch this fish in the aquarium to reveal its phishing tactic and red flags.</p>
+                <div class="species-tags">
+                  <span class="flag-chip locked-chip">??? Red Flags</span>
+                </div>
+              </article>
+            `;
+          }
+
+          const guide = sp.fieldGuide || {};
+          const summary = guide.howItWorks || sp.type || 'Suspicious phishing lure caught in the tank.';
+          const flagCount = Array.isArray(sp.redFlags) ? sp.redFlags.length : 3;
+
+          return `
+            <article class="species-card is-caught" role="listitem" style="--sticker-tilt: ${tilt}deg;" aria-label="${escapeHtml(sp.name)} sticker">
+              <div class="card-top-row">
+                <span class="species-number">#${num}</span>
+                <span class="species-status is-caught-status">Caught</span>
+              </div>
+              <div class="species-silhouette is-caught-artwork">
+                ${renderSpeciesArtworkSvg(sp)}
+              </div>
+              <h3 class="species-name">${escapeHtml(sp.name)}</h3>
+              <p class="species-desc">${escapeHtml(summary)}</p>
+              <div class="species-tags">
+                <span class="flag-chip">${flagCount} Red Flags Spotted</span>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGuide);
+      } else {
+        initGuide();
+      }
+    })();
+  </script>
 </body>
 </html>
