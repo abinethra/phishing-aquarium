@@ -1,8 +1,8 @@
 /**
  * js/game.js
- * Core inspection, red-flag spotting, scoring (+300 catch, +100 clean,
- * +50/s under 20s capped at +200, minus Step 4 penalties), hint,
- * persistence, New Game confirm, and Tank Cleared results modal.
+ * Core inspection, red-flag spotting, scoring, hint, persistence,
+ * first-visit onboarding sticker, catch screen-reader announcements,
+ * New Game confirm, and Tank Cleared results modal.
  */
 (function () {
   const FLAG_POINTS = 100;
@@ -22,12 +22,14 @@
     totalTimeSec: 0,
     correctClicks: 0,
     wrongClicks: 0,
+    onboardingSeen: false,
     speciesStats: {},
     activeSpecies: null,
     inspectStartMs: null,
     fishWrongClicks: 0,
     fishHintsUsed: 0,
     foundFlagIds: new Set(),
+    justStampedFlagId: null,
     activeExplanation: null,
     hintedFlagId: null,
     isCatching: false,
@@ -42,8 +44,18 @@
       inspectorEl: document.getElementById('inspector-card'),
       slotsWrap: document.querySelector('.collection-slots'),
       viewportEl: document.querySelector('.tank-viewport'),
-      deckControlsEl: document.querySelector('.deck-controls')
+      deckControlsEl: document.querySelector('.deck-controls'),
+      announcerEl: document.getElementById('catch-announcer')
     };
+  }
+
+  function announceCatch(message) {
+    const { announcerEl } = getEls();
+    if (!announcerEl) return;
+    announcerEl.textContent = '';
+    window.setTimeout(() => {
+      announcerEl.textContent = message;
+    }, 30);
   }
 
   function escapeHtml(str) {
@@ -64,11 +76,49 @@
         totalTimeSec: gameState.totalTimeSec,
         correctClicks: gameState.correctClicks,
         wrongClicks: gameState.wrongClicks,
+        onboardingSeen: gameState.onboardingSeen,
         speciesStats: gameState.speciesStats
       });
       if (saved && typeof saved.bestScore === 'number') {
         gameState.bestScore = saved.bestScore;
       }
+    }
+  }
+
+  function dismissOnboarding() {
+    if (gameState.onboardingSeen) return;
+    gameState.onboardingSeen = true;
+    persistNow();
+    const sticker = document.getElementById('onboarding-sticker');
+    if (sticker) sticker.remove();
+  }
+
+  function renderOnboardingSticker() {
+    const { viewportEl } = getEls();
+    if (!viewportEl || gameState.onboardingSeen) return;
+    if (document.getElementById('onboarding-sticker')) return;
+
+    const sticker = document.createElement('div');
+    sticker.id = 'onboarding-sticker';
+    sticker.className = 'onboarding-sticker';
+    sticker.setAttribute('role', 'note');
+    sticker.setAttribute('aria-label', 'How to play: Click a fish. Spot 3 red flags. Collect them all.');
+    sticker.innerHTML = `
+      <div class="onboarding-sticker-top">
+        <span class="onboarding-tag">Quick Tip</span>
+        <button type="button" id="onboarding-dismiss-btn" class="onboarding-dismiss-btn" aria-label="Dismiss quick tip">Got it</button>
+      </div>
+      <p class="onboarding-text">Click a fish. Spot 3 red flags. Collect them all.</p>
+    `;
+
+    viewportEl.appendChild(sticker);
+
+    const dismissBtn = document.getElementById('onboarding-dismiss-btn');
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dismissOnboarding();
+      });
     }
   }
 
@@ -111,6 +161,7 @@
           totalTimeSec: 0,
           correctClicks: 0,
           wrongClicks: 0,
+          onboardingSeen: true,
           speciesStats: {}
         };
 
@@ -120,12 +171,14 @@
     gameState.totalTimeSec = 0;
     gameState.correctClicks = 0;
     gameState.wrongClicks = 0;
+    gameState.onboardingSeen = true;
     gameState.speciesStats = {};
     gameState.activeSpecies = null;
     gameState.inspectStartMs = null;
     gameState.fishWrongClicks = 0;
     gameState.fishHintsUsed = 0;
     gameState.foundFlagIds = new Set();
+    gameState.justStampedFlagId = null;
     gameState.activeExplanation = null;
     gameState.hintedFlagId = null;
     gameState.isCatching = false;
@@ -261,9 +314,11 @@
 
       const isFound = gameState.foundFlagIds.has(m.flag.id);
       const isHinted = gameState.hintedFlagId === m.flag.id && !isFound;
+      const isStamped = gameState.justStampedFlagId === m.flag.id;
       const classes = ['flag-token'];
       if (isFound) classes.push('is-found');
       if (isHinted) classes.push('is-hinted');
+      if (isStamped) classes.push('is-stamped');
 
       const ariaPressed = isFound ? 'true' : 'false';
       const label = isFound
@@ -286,6 +341,14 @@
     return chunks.join('');
   }
 
+  function animateInspectorPop() {
+    const { inspectorEl } = getEls();
+    if (!inspectorEl) return;
+    inspectorEl.classList.remove('is-popping');
+    void inspectorEl.offsetWidth;
+    inspectorEl.classList.add('is-popping');
+  }
+
   function renderEmptyInspector() {
     const { inspectorEl } = getEls();
     if (!inspectorEl) return;
@@ -300,7 +363,7 @@
     `;
   }
 
-  function renderInspector() {
+  function renderInspector(shouldPop = false) {
     const { inspectorEl } = getEls();
     if (!inspectorEl) return;
 
@@ -379,6 +442,11 @@
       ${explanationHtml}
     `;
 
+    if (shouldPop) {
+      animateInspectorPop();
+    }
+
+    gameState.justStampedFlagId = null;
     bindInspectorEvents();
   }
 
@@ -403,13 +471,14 @@
       kind: 'not a red flag',
       explanation: `That part looks normal — ${WRONG_PENALTY} pts for a false alarm. Try another phrase!`
     };
-    renderInspector();
+    renderInspector(false);
   }
 
   function handleFlagFound(flag) {
     if (!flag || gameState.foundFlagIds.has(flag.id) || gameState.isCatching) return;
 
     gameState.foundFlagIds.add(flag.id);
+    gameState.justStampedFlagId = flag.id;
     gameState.correctClicks += 1;
     if (gameState.hintedFlagId === flag.id) {
       gameState.hintedFlagId = null;
@@ -427,7 +496,7 @@
 
     persistNow();
     updateHud();
-    renderInspector();
+    renderInspector(false);
 
     if (sp && foundCount >= totalFlags) {
       completeCatch(sp);
@@ -504,16 +573,18 @@
 
     updateHud();
 
+    const totalSpecies = gameState.species.length || 8;
     const bonusParts = [`+${breakdown.base}`];
     if (breakdown.cleanBonus > 0) bonusParts.push(`+${breakdown.cleanBonus} clean`);
     if (breakdown.speedBonus > 0) bonusParts.push(`+${breakdown.speedBonus} speed`);
-    showToast(`Caught ${species.name}! (${bonusParts.join(', ')})`);
+    const toastMsg = `Caught ${species.name}! (${bonusParts.join(', ')})`;
+    showToast(toastMsg);
+    announceCatch(`${species.name} caught! ${gameState.caughtIds.length} of ${totalSpecies} species collected. Score is now ${Math.round(gameState.score)}.`);
 
     if (window.Tank && typeof window.Tank.playCatchAnimation === 'function') {
       window.Tank.playCatchAnimation(species.id, slotIndex);
     }
 
-    const totalSpecies = gameState.species.length || 8;
     const allCaught = gameState.caughtIds.length >= totalSpecies;
 
     window.setTimeout(() => {
@@ -522,6 +593,7 @@
       gameState.fishWrongClicks = 0;
       gameState.fishHintsUsed = 0;
       gameState.foundFlagIds = new Set();
+      gameState.justStampedFlagId = null;
       gameState.activeExplanation = null;
       gameState.hintedFlagId = null;
       gameState.isCatching = false;
@@ -616,7 +688,7 @@
         closeTankClearedModal();
         const resetData = window.Storage && typeof window.Storage.resetProgress === 'function'
           ? window.Storage.resetProgress()
-          : { score: 0, bestScore: gameState.bestScore, caughtIds: [], totalTimeSec: 0, correctClicks: 0, wrongClicks: 0, speciesStats: {} };
+          : { score: 0, bestScore: gameState.bestScore, caughtIds: [], totalTimeSec: 0, correctClicks: 0, wrongClicks: 0, onboardingSeen: true, speciesStats: {} };
 
         gameState.score = resetData.score || 0;
         gameState.bestScore = Math.max(gameState.bestScore, resetData.bestScore || 0);
@@ -624,6 +696,7 @@
         gameState.totalTimeSec = 0;
         gameState.correctClicks = 0;
         gameState.wrongClicks = 0;
+        gameState.onboardingSeen = true;
         gameState.speciesStats = {};
         gameState.modalShownForRun = false;
 
@@ -662,7 +735,7 @@
 
     persistNow();
     updateHud();
-    renderInspector();
+    renderInspector(false);
   }
 
   function bindInspectorEvents() {
@@ -702,11 +775,14 @@
     if (!species || gameState.isCatching) return;
     if (gameState.caughtIds.includes(species.id)) return;
 
+    dismissOnboarding();
+
     gameState.activeSpecies = species;
     gameState.inspectStartMs = performance.now();
     gameState.fishWrongClicks = 0;
     gameState.fishHintsUsed = 0;
     gameState.foundFlagIds = new Set();
+    gameState.justStampedFlagId = null;
     gameState.activeExplanation = null;
     gameState.hintedFlagId = null;
 
@@ -714,7 +790,7 @@
       window.Tank.setFrozenFish(species.id);
     }
 
-    renderInspector();
+    renderInspector(true);
   }
 
   async function loadSpeciesData() {
@@ -764,12 +840,14 @@
         gameState.totalTimeSec = saved.totalTimeSec || 0;
         gameState.correctClicks = saved.correctClicks || 0;
         gameState.wrongClicks = saved.wrongClicks || 0;
+        gameState.onboardingSeen = Boolean(saved.onboardingSeen);
         gameState.speciesStats = saved.speciesStats || {};
       }
     }
 
     gameState.species = await loadSpeciesData();
     updateHud();
+    renderOnboardingSticker();
 
     if (window.Tank) {
       if (typeof window.Tank.setSpecies === 'function') {

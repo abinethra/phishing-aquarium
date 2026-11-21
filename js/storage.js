@@ -2,7 +2,7 @@
  * js/storage.js
  * localStorage persistence for "The Phishing Aquarium".
  * Saves score, caught species, best score, elapsed time, accuracy stats,
- * and per-species catch stats.
+ * onboarding dismissal, and per-species catch stats.
  */
 (function () {
   const STORAGE_KEY = 'phishing_aquarium_save_v1';
@@ -15,6 +15,7 @@
       totalTimeSec: 0,
       correctClicks: 0,
       wrongClicks: 0,
+      onboardingSeen: false,
       speciesStats: {}
     };
   }
@@ -47,6 +48,8 @@
       ? Math.max(0, Math.round(raw.wrongClicks))
       : 0;
 
+    const onboardingSeen = Boolean(raw.onboardingSeen);
+
     const speciesStats = {};
     if (raw.speciesStats && typeof raw.speciesStats === 'object') {
       Object.keys(raw.speciesStats).forEach((id) => {
@@ -72,6 +75,7 @@
       totalTimeSec,
       correctClicks,
       wrongClicks,
+      onboardingSeen,
       speciesStats
     };
   }
@@ -145,7 +149,8 @@
     const existing = loadProgress();
     const fresh = {
       ...getDefaultState(),
-      bestScore: existing.bestScore || 0
+      bestScore: existing.bestScore || 0,
+      onboardingSeen: true
     };
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));

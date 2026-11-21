@@ -1,8 +1,8 @@
 /**
  * js/tank.js
  * Animated sticker-style aquarium canvas for "The Phishing Aquarium".
- * Uses vanilla Canvas 2D + Path2D, respects devicePixelRatio, container resize,
- * tab visibility pausing, and prefers-reduced-motion.
+ * Includes caustic seabed ripples, seaweed parallax, multi-burst catch sparkles,
+ * devicePixelRatio scaling, resize handling, visibility pause, and reduced motion.
  */
 (function () {
   const INK = '#111318';
@@ -35,6 +35,8 @@
     stars: [],
     seaweed: [],
     sandDots: [],
+    parallaxX: 0,
+    parallaxY: 0,
     rays: [
       { baseX: 0.18, width: 85, speed: 0.00018, phase: 0.2, alpha: 0.11 },
       { baseX: 0.48, width: 110, speed: -0.00014, phase: 1.7, alpha: 0.09 },
@@ -149,10 +151,10 @@
     ];
 
     state.seaweed = [
-      { x: w * 0.11, baseY: sandTop + 4, height: 58, swayPhase: 0.2, colour: '#279B6E' },
-      { x: w * 0.14, baseY: sandTop + 4, height: 42, swayPhase: 1.4, colour: '#5DCAA5' },
-      { x: w * 0.46, baseY: sandTop + 4, height: 64, swayPhase: 2.5, colour: '#1E825C' },
-      { x: w * 0.49, baseY: sandTop + 4, height: 48, swayPhase: 3.7, colour: '#5DCAA5' }
+      { x: w * 0.11, baseY: sandTop + 4, height: 58, swayPhase: 0.2, colour: '#279B6E', depth: 0.6 },
+      { x: w * 0.14, baseY: sandTop + 4, height: 42, swayPhase: 1.4, colour: '#5DCAA5', depth: 1.0 },
+      { x: w * 0.46, baseY: sandTop + 4, height: 64, swayPhase: 2.5, colour: '#1E825C', depth: 0.55 },
+      { x: w * 0.49, baseY: sandTop + 4, height: 48, swayPhase: 3.7, colour: '#5DCAA5', depth: 1.05 }
     ];
 
     state.sandDots = Array.from({ length: 16 }, (_, i) => ({
@@ -271,7 +273,7 @@
 
     ctx.save();
     state.rays.forEach((ray) => {
-      const drift = Math.sin(t * ray.speed * 1000 + ray.phase) * 48;
+      const drift = Math.sin(t * ray.speed * 1000 + ray.phase) * 48 + state.parallaxX * 0.35;
       const topX = w * ray.baseX + drift;
       const spread = ray.width * 0.65;
 
@@ -297,7 +299,7 @@
 
       ctx.save();
       ctx.globalAlpha = twinkle;
-      ctx.translate(star.x, star.y);
+      ctx.translate(star.x + state.parallaxX * 0.2, star.y + state.parallaxY * 0.2);
       ctx.fillStyle = star.colour;
       ctx.beginPath();
       ctx.moveTo(0, -r);
@@ -315,7 +317,7 @@
     ctx.fillStyle = 'rgba(215, 238, 255, 0.15)';
     ctx.lineWidth = 1.6;
     state.bubbles.forEach((b) => {
-      const wobbleX = b.x + Math.sin(t * 0.0025 + b.wobblePhase) * 5;
+      const wobbleX = b.x + Math.sin(t * 0.0025 + b.wobblePhase) * 5 + state.parallaxX * 0.45;
       ctx.beginPath();
       ctx.arc(wobbleX, b.y, b.r, 0, Math.PI * 2);
       ctx.fill();
@@ -331,6 +333,9 @@
 
     state.seaweed.forEach((blade) => {
       const sway = Math.sin(t * 0.002 + blade.swayPhase) * 9;
+      const px = blade.x + state.parallaxX * blade.depth;
+      const py = blade.baseY + state.parallaxY * blade.depth * 0.35;
+
       ctx.save();
       ctx.fillStyle = blade.colour;
       ctx.strokeStyle = INK;
@@ -338,17 +343,17 @@
       ctx.lineJoin = 'round';
 
       ctx.beginPath();
-      ctx.moveTo(blade.x - 7, blade.baseY);
-      ctx.quadraticCurveTo(blade.x - 10 + sway * 0.5, blade.baseY - blade.height * 0.55, blade.x + sway, blade.baseY - blade.height);
-      ctx.quadraticCurveTo(blade.x + 10 + sway * 0.5, blade.baseY - blade.height * 0.55, blade.x + 7, blade.baseY);
+      ctx.moveTo(px - 7, py);
+      ctx.quadraticCurveTo(px - 10 + sway * 0.5, py - blade.height * 0.55, px + sway, py - blade.height);
+      ctx.quadraticCurveTo(px + 10 + sway * 0.5, py - blade.height * 0.55, px + 7, py);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
       ctx.restore();
     });
 
-    const coralX = w * 0.28;
-    const coralY = sandTop + 3;
+    const coralX = w * 0.28 + state.parallaxX * 0.7;
+    const coralY = sandTop + 3 + state.parallaxY * 0.2;
     ctx.save();
     ctx.fillStyle = '#D85A30';
     ctx.strokeStyle = INK;
@@ -389,6 +394,27 @@
     ctx.lineTo(w, h);
     ctx.closePath();
     ctx.fill();
+
+    // Slow caustic light ripples across the seabed
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, sandTop, w, h - sandTop);
+    ctx.clip();
+
+    ctx.strokeStyle = 'rgba(255, 250, 214, 0.34)';
+    ctx.lineWidth = 2;
+    for (let row = 0; row < 2; row++) {
+      const baseRippleY = sandTop + 14 + row * 20;
+      ctx.beginPath();
+      for (let x = 0; x <= w; x += 24) {
+        const phaseShift = t * 0.0014 + row * 1.9;
+        const ry = baseRippleY + Math.sin(x * 0.038 + phaseShift) * 4.2 + Math.cos(x * 0.017 - phaseShift * 0.7) * 2;
+        if (x === 0) ctx.moveTo(x, ry);
+        else ctx.lineTo(x, ry);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
 
     ctx.strokeStyle = INK;
     ctx.lineWidth = 2.5;
@@ -565,21 +591,21 @@
     });
   }
 
-  function spawnSparkles(x, y, count = 14) {
-    const colours = ['#FAC775', '#5DCAA5', '#FFFFFF', '#D4537E', '#7F77DD'];
+  function spawnSparkles(x, y, count = 18) {
+    const colours = ['#FAC775', '#5DCAA5', '#FFFFFF', '#D4537E', '#7F77DD', '#D85A30'];
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
-      const speed = 45 + Math.random() * 85;
+      const speed = 50 + Math.random() * 105;
       state.sparkles.push({
         x,
         y,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 20,
-        size: 5 + Math.random() * 5,
+        vy: Math.sin(angle) * speed - 24,
+        size: 5 + Math.random() * 5.5,
         rot: Math.random() * Math.PI,
-        vRot: (Math.random() - 0.5) * 8,
-        life: 0.65 + Math.random() * 0.25,
-        maxLife: 0.9,
+        vRot: (Math.random() - 0.5) * 9,
+        life: 0.7 + Math.random() * 0.25,
+        maxLife: 0.95,
         colour: colours[i % colours.length]
       });
     }
@@ -589,6 +615,12 @@
     const scale = getMotionScale();
     const dt = (dtMs / 1000) * scale;
     state.elapsed += dtMs * scale;
+
+    // Gentle ambient parallax drift
+    const targetPx = Math.sin(state.elapsed * 0.0007) * 6;
+    const targetPy = Math.cos(state.elapsed * 0.0005) * 3;
+    state.parallaxX += (targetPx - state.parallaxX) * Math.min(1, dt * 4);
+    state.parallaxY += (targetPy - state.parallaxY) * Math.min(1, dt * 4);
 
     const w = state.width;
     const h = state.height;
@@ -632,7 +664,6 @@
       fish.tailPhase += dt * (fish.isWhale ? 5.5 : 8.5);
     });
 
-    // Catch shrink-into-collection-strip animation
     if (state.catchAnim) {
       const anim = state.catchAnim;
       anim.progress += dt / anim.duration;
@@ -644,19 +675,22 @@
       anim.alpha = Math.max(0, 1 - ease * 0.85);
       anim.fish.tailPhase += dt * 16;
 
+      if (Math.random() < 0.45) {
+        spawnSparkles(anim.fish.x, anim.fish.y, 2);
+      }
+
       if (p >= 1) {
-        spawnSparkles(anim.targetX, anim.targetY, 12);
+        spawnSparkles(anim.targetX, anim.targetY, 16);
         state.catchAnim = null;
         rebuildFishList();
       }
     }
 
-    // Update sparkles
     for (let i = state.sparkles.length - 1; i >= 0; i--) {
       const sp = state.sparkles[i];
       sp.x += sp.vx * dt;
       sp.y += sp.vy * dt;
-      sp.vy += 90 * dt;
+      sp.vy += 95 * dt;
       sp.rot += sp.vRot * dt;
       sp.life -= dt;
       if (sp.life <= 0) {
@@ -903,7 +937,7 @@
     const targetX = state.width * slotFrac;
     const targetY = state.height - 16;
 
-    spawnSparkles(startX, startY, 16);
+    spawnSparkles(startX, startY, 22);
 
     const clonedFish = targetFish
       ? { ...targetFish }
