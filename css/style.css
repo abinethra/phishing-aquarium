@@ -70,7 +70,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Subtle background star specks matching retro device backdrop */
 .starfield {
   position: fixed;
   inset: 0;
@@ -84,7 +83,6 @@ body {
   z-index: 0;
 }
 
-/* Layout Container */
 .app-shell {
   position: relative;
   z-index: 1;
@@ -94,7 +92,6 @@ body {
   padding: var(--space-5) var(--space-4) var(--space-6);
 }
 
-/* Top Header Bar */
 .top-bar {
   display: flex;
   flex-wrap: wrap;
@@ -151,7 +148,6 @@ body {
   background-color: var(--accent-salmon);
 }
 
-/* Retro Aquarium Device Frame */
 .aquarium-console {
   background-color: var(--console-shell);
   color: var(--text-primary);
@@ -162,7 +158,6 @@ body {
   position: relative;
 }
 
-/* Stippled Dot Texture Strips */
 .stippled-band {
   height: 14px;
   width: 100%;
@@ -179,7 +174,6 @@ body {
   margin: var(--space-3) 0;
 }
 
-/* Tank Stage & Water Window */
 .tank-stage {
   position: relative;
   width: 100%;
@@ -196,7 +190,6 @@ body {
   box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
-/* Lighter Top Water Band + Subtle Animated Wave Line */
 .water-top-band {
   position: absolute;
   top: 0;
@@ -233,19 +226,6 @@ body {
   }
 }
 
-/* Seabed Strip Preview */
-.sand-bed {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 54px;
-  background: linear-gradient(180deg, var(--sand-gold) 0%, #E7AF52 100%);
-  border-top: var(--outline-thick) solid var(--ink-black);
-  z-index: 1;
-  pointer-events: none;
-}
-
 #tank {
   position: relative;
   z-index: 2;
@@ -257,30 +237,65 @@ body {
 
 #tank:focus-visible,
 .pill-btn:focus-visible,
-.species-card:focus-visible {
+.species-card:focus-visible,
+.flag-token:focus-visible,
+.hint-btn:focus-visible {
   outline: 3px solid var(--accent-teal);
-  outline-offset: 3px;
+  outline-offset: 2px;
+}
+
+/* Success Catch Toast */
+.catch-toast {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translate(-50%, -12px);
+  z-index: 5;
+  padding: 8px 18px;
+  background-color: var(--accent-teal);
+  color: var(--ink-black);
+  border: var(--outline-medium) solid var(--ink-black);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 700;
+  box-shadow: 0 4px 0 var(--ink-black);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.catch-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 /* Overlaid Email Inspector Sticker */
 .inspector-card {
   position: absolute;
-  top: 22px;
-  right: 22px;
+  top: 16px;
+  right: 18px;
   z-index: 4;
-  width: 292px;
-  min-height: 318px;
+  width: 318px;
+  max-height: 428px;
+  overflow-y: auto;
   background-color: var(--card-white);
   color: var(--text-primary);
   border: var(--outline-thick) solid var(--ink-black);
   border-radius: var(--radius-md);
-  padding: var(--space-4);
+  padding: 14px;
   box-shadow: var(--shadow-sticker);
-  transform: rotate(2.4deg);
+  transform: rotate(1.6deg);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.inspector-card.is-empty {
+  min-height: 318px;
   justify-content: center;
+  transform: rotate(2.4deg);
 }
 
 .inspector-empty-state {
@@ -315,6 +330,244 @@ body {
   font-size: 0.85rem;
   line-height: 1.45;
   color: var(--text-muted);
+}
+
+.inspector-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inspector-species-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.species-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-black);
+  flex-shrink: 0;
+}
+
+.inspector-species-name {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink-black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hint-btn {
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--ink-black);
+  background-color: var(--accent-amber);
+  color: var(--ink-black);
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.hint-btn:hover:not(:disabled) {
+  background-color: #F5B856;
+  transform: translateY(-1px);
+}
+
+.hint-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 3-Segment Flag Progress Bar */
+.flag-progress-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.flag-progress-bars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  flex: 1;
+}
+
+.flag-seg {
+  height: 9px;
+  border-radius: 999px;
+  background-color: #E5E7EB;
+  border: 1.5px solid var(--ink-black);
+  transition: background-color 0.2s ease;
+}
+
+.flag-seg.is-filled {
+  background-color: var(--accent-coral);
+}
+
+.flag-progress-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* Email Sheet & Interactive Flag Tokens */
+.email-sheet {
+  background-color: #F9FAFC;
+  border: 2px solid var(--ink-black);
+  border-radius: var(--radius-sm);
+  padding: 10px 11px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.email-sheet.is-shaking {
+  animation: emailShake 0.34s ease;
+}
+
+@keyframes emailShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.email-row {
+  margin-bottom: 5px;
+  word-break: break-word;
+}
+
+.email-field-label {
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.email-addr {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.email-subject {
+  font-weight: 600;
+}
+
+.email-body-copy {
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px dashed #CBD2DF;
+}
+
+.email-cta-row {
+  margin-top: 8px;
+}
+
+.email-fake-link {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1.5px solid #2563EB;
+  color: #1D4ED8;
+  font-weight: 600;
+  background-color: #EFF6FF;
+}
+
+/* Clickable / Focusable Red Flag Buttons */
+.flag-token {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline;
+  padding: 1px 4px;
+  margin: 0 1px;
+  border-radius: 5px;
+  border: 1.5px dashed rgba(122, 20, 20, 0.35);
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.flag-token:hover {
+  background-color: rgba(247, 193, 193, 0.45);
+  border-style: solid;
+  border-color: var(--flag-text);
+}
+
+.flag-token.is-found {
+  background-color: var(--flag-bg);
+  color: var(--flag-text);
+  border: 1.5px solid var(--flag-text);
+  font-weight: 700;
+}
+
+.flag-token.is-hinted {
+  background-color: rgba(247, 193, 193, 0.65);
+  border: 2px solid var(--flag-text);
+  animation: flagPulse 0.95s ease-in-out infinite;
+}
+
+@keyframes flagPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(216, 90, 48, 0.55);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(216, 90, 48, 0);
+    transform: scale(1.03);
+  }
+}
+
+/* Explanation Tooltip Card */
+.flag-explanation-card {
+  background-color: var(--flag-bg);
+  color: var(--flag-text);
+  border: 2px solid var(--ink-black);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+}
+
+.explanation-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background-color: var(--card-white);
+  color: var(--flag-text);
+  border: 1.5px solid var(--flag-text);
+  margin-bottom: 4px;
+}
+
+.explanation-text {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.42;
+  font-weight: 500;
+}
+
+.inspector-hint-copy {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-align: center;
 }
 
 /* Bottom Deck: Collection Strip & Controls */
@@ -363,6 +616,24 @@ body {
   color: var(--text-muted);
 }
 
+.slot-caught {
+  border: var(--outline-medium) solid var(--ink-black);
+  color: var(--ink-black);
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
+.slot-envelope {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 19px;
+  background-color: var(--card-white);
+  border: 2px solid var(--ink-black);
+  border-radius: 4px;
+  font-size: 0.78rem;
+}
+
 .deck-controls {
   display: flex;
   align-items: center;
@@ -396,7 +667,6 @@ body {
   transform: translateY(1px);
 }
 
-/* Decorative Console Power Switch */
 .power-switch {
   width: 64px;
   height: 44px;
@@ -423,7 +693,6 @@ body {
   border-radius: 2px;
 }
 
-/* Console Base Plinth & Little Feet */
 .console-base {
   width: 82%;
   height: 22px;
@@ -451,9 +720,7 @@ body {
   border-radius: 0 0 8px 8px;
 }
 
-/* =========================================================
-   Collection & Field Guide Page
-   ========================================================= */
+/* Collection & Field Guide Page */
 .field-guide-console {
   padding-bottom: var(--space-4);
 }
@@ -599,9 +866,7 @@ body {
   color: var(--text-muted);
 }
 
-/* =========================================================
-   Responsive Breakpoints (Down to 360px)
-   ========================================================= */
+/* Responsive Breakpoints (Down to 360px) */
 @media (max-width: 960px) {
   .species-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -618,10 +883,10 @@ body {
     height: 300px;
   }
 
-  /* Move inspector below tank on mobile */
   .inspector-card {
     position: static;
     width: 100%;
+    max-height: none;
     min-height: 150px;
     margin-top: var(--space-3);
     transform: rotate(0deg);
@@ -665,13 +930,18 @@ body {
 
 /* Accessibility: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .wave-svg {
+  .wave-svg,
+  .email-sheet.is-shaking,
+  .flag-token.is-hinted {
     animation: none;
   }
 
   .inspector-card,
   .species-card,
-  .pill-btn {
+  .pill-btn,
+  .flag-token,
+  .flag-seg,
+  .catch-toast {
     transition: none;
   }
 }

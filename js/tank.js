@@ -23,9 +23,14 @@
     width: 1040,
     height: 460,
     dpr: 1,
+    allSpecies: DEFAULT_SPECIES.slice(),
+    caughtIds: new Set(),
     fishList: [],
     hoveredFish: null,
     selectedFish: null,
+    frozenFishId: null,
+    catchAnim: null,
+    sparkles: [],
     bubbles: [],
     stars: [],
     seaweed: [],
@@ -106,6 +111,20 @@
       tailPhase: index * 0.85,
       tilt: 0
     };
+  }
+
+  function rebuildFishList() {
+    const activeSpecies = state.allSpecies.filter((sp) => !state.caughtIds.has(sp.id));
+    state.fishList = activeSpecies.map((sp, idx) => createFishEntity(sp, idx, activeSpecies.length));
+    if (state.hoveredFish && state.caughtIds.has(state.hoveredFish.id)) {
+      state.hoveredFish = null;
+    }
+    if (state.selectedFish && state.caughtIds.has(state.selectedFish.id)) {
+      state.selectedFish = null;
+    }
+    if (state.frozenFishId && state.caughtIds.has(state.frozenFishId)) {
+      state.frozenFishId = null;
+    }
   }
 
   function populateSceneDecor() {
@@ -250,7 +269,6 @@
     ctx.lineTo(w, topBandH);
     ctx.stroke();
 
-    // 3 slowly moving translucent sun-ray beams
     ctx.save();
     state.rays.forEach((ray) => {
       const drift = Math.sin(t * ray.speed * 1000 + ray.phase) * 48;
@@ -273,7 +291,6 @@
     });
     ctx.restore();
 
-    // Twinkling 4-point stars
     state.stars.forEach((star) => {
       const twinkle = 0.55 + 0.45 * Math.sin(t * 0.0032 + star.phase);
       const r = star.size * (0.8 + 0.25 * twinkle);
@@ -293,7 +310,6 @@
       ctx.restore();
     });
 
-    // Thin-outlined rising bubbles
     ctx.save();
     ctx.strokeStyle = 'rgba(215, 238, 255, 0.8)';
     ctx.fillStyle = 'rgba(215, 238, 255, 0.15)';
@@ -414,19 +430,21 @@
     ctx.restore();
   }
 
-  function drawFish(ctx, fish, isHovered) {
+  function drawFishEntity(ctx, fish, options = {}) {
+    const { isHovered = false, isFrozen = false, scale = 1, alpha = 1 } = options;
     const hw = fish.w * 0.5;
     const hh = fish.h * 0.5;
 
     ctx.save();
+    ctx.globalAlpha = alpha;
     ctx.translate(fish.x, fish.y);
     ctx.rotate(fish.tilt);
-    ctx.scale(fish.dir, 1);
+    ctx.scale(fish.dir * scale, scale);
 
-    if (isHovered) {
+    if (isHovered || isFrozen) {
       ctx.save();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = isFrozen ? '#FAC775' : '#FFFFFF';
+      ctx.lineWidth = isFrozen ? 3 : 2.5;
       ctx.setLineDash([7, 6]);
       ctx.beginPath();
       ctx.roundRect(-hw - 22, -hh - 14, fish.w + 34, fish.h + 28, 16);
@@ -522,6 +540,51 @@
     ctx.restore();
   }
 
+  function drawSparkles(ctx) {
+    state.sparkles.forEach((sp) => {
+      const alpha = Math.max(0, sp.life / sp.maxLife);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(sp.x, sp.y);
+      ctx.rotate(sp.rot);
+      ctx.fillStyle = sp.colour;
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.5;
+
+      const r = sp.size;
+      ctx.beginPath();
+      ctx.moveTo(0, -r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.quadraticCurveTo(0, 0, 0, r);
+      ctx.quadraticCurveTo(0, 0, -r, 0);
+      ctx.quadraticCurveTo(0, 0, 0, -r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function spawnSparkles(x, y, count = 14) {
+    const colours = ['#FAC775', '#5DCAA5', '#FFFFFF', '#D4537E', '#7F77DD'];
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
+      const speed = 45 + Math.random() * 85;
+      state.sparkles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 20,
+        size: 5 + Math.random() * 5,
+        rot: Math.random() * Math.PI,
+        vRot: (Math.random() - 0.5) * 8,
+        life: 0.65 + Math.random() * 0.25,
+        maxLife: 0.9,
+        colour: colours[i % colours.length]
+      });
+    }
+  }
+
   function update(dtMs) {
     const scale = getMotionScale();
     const dt = (dtMs / 1000) * scale;
@@ -534,6 +597,11 @@
     const marginRight = w > 768 ? 310 : 36;
 
     state.fishList.forEach((fish) => {
+      if (state.frozenFishId === fish.id) {
+        fish.tilt *= Math.max(0, 1 - dt * 10);
+        return;
+      }
+
       const prevY = fish.y;
       fish.x += fish.vx * dt;
 
@@ -564,6 +632,38 @@
       fish.tailPhase += dt * (fish.isWhale ? 5.5 : 8.5);
     });
 
+    // Catch shrink-into-collection-strip animation
+    if (state.catchAnim) {
+      const anim = state.catchAnim;
+      anim.progress += dt / anim.duration;
+      const p = Math.min(1, anim.progress);
+      const ease = p * p * (3 - 2 * p);
+      anim.fish.x = anim.startX + (anim.targetX - anim.startX) * ease;
+      anim.fish.y = anim.startY + (anim.targetY - anim.startY) * ease;
+      anim.scale = Math.max(0.12, 1 - ease * 0.85);
+      anim.alpha = Math.max(0, 1 - ease * 0.85);
+      anim.fish.tailPhase += dt * 16;
+
+      if (p >= 1) {
+        spawnSparkles(anim.targetX, anim.targetY, 12);
+        state.catchAnim = null;
+        rebuildFishList();
+      }
+    }
+
+    // Update sparkles
+    for (let i = state.sparkles.length - 1; i >= 0; i--) {
+      const sp = state.sparkles[i];
+      sp.x += sp.vx * dt;
+      sp.y += sp.vy * dt;
+      sp.vy += 90 * dt;
+      sp.rot += sp.vRot * dt;
+      sp.life -= dt;
+      if (sp.life <= 0) {
+        state.sparkles.splice(i, 1);
+      }
+    }
+
     state.bubbles.forEach((b) => {
       b.y -= b.speed * dt;
       if (b.y < 14) {
@@ -585,10 +685,20 @@
     drawSeabed(ctx, state.elapsed || nowMs);
 
     state.fishList.forEach((fish) => {
+      if (state.catchAnim && state.catchAnim.fish.id === fish.id) return;
       const isHovered = state.hoveredFish && state.hoveredFish.id === fish.id;
-      drawFish(ctx, fish, isHovered);
+      const isFrozen = state.frozenFishId === fish.id;
+      drawFishEntity(ctx, fish, { isHovered, isFrozen });
     });
 
+    if (state.catchAnim) {
+      drawFishEntity(ctx, state.catchAnim.fish, {
+        scale: state.catchAnim.scale,
+        alpha: state.catchAnim.alpha
+      });
+    }
+
+    drawSparkles(ctx);
     ctx.restore();
   }
 
@@ -670,6 +780,7 @@
   function getFishAt(x, y) {
     for (let i = state.fishList.length - 1; i >= 0; i--) {
       const fish = state.fishList[i];
+      if (state.caughtIds.has(fish.id)) continue;
       const padX = fish.w * 0.56 + 14;
       const padY = fish.h * 0.62 + 10;
       const dx = x - fish.x;
@@ -740,11 +851,10 @@
       }
     });
 
-    const speciesList = Array.isArray(options.species) && options.species.length > 0
-      ? options.species
-      : DEFAULT_SPECIES;
-
-    state.fishList = speciesList.map((sp, idx) => createFishEntity(sp, idx, speciesList.length));
+    if (Array.isArray(options.species) && options.species.length > 0) {
+      state.allSpecies = options.species.slice();
+    }
+    rebuildFishList();
 
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerleave', handlePointerLeave);
@@ -769,8 +879,65 @@
 
   function setSpecies(speciesList) {
     if (!Array.isArray(speciesList) || speciesList.length === 0) return;
-    state.fishList = speciesList.map((sp, idx) => createFishEntity(sp, idx, speciesList.length));
+    state.allSpecies = speciesList.slice();
+    rebuildFishList();
     state.hoveredFish = null;
+  }
+
+  function setCaughtIds(ids) {
+    state.caughtIds = new Set(Array.isArray(ids) ? ids : []);
+    rebuildFishList();
+  }
+
+  function setFrozenFish(fishId) {
+    state.frozenFishId = fishId || null;
+  }
+
+  function playCatchAnimation(fishId, targetSlotIndex = 0) {
+    const targetFish = state.fishList.find((f) => f.id === fishId) ||
+      (state.selectedFish && state.selectedFish.id === fishId ? state.selectedFish : null);
+
+    const startX = targetFish ? targetFish.x : state.width * 0.35;
+    const startY = targetFish ? targetFish.y : state.height * 0.45;
+    const slotFrac = Math.min(0.45, 0.07 + targetSlotIndex * 0.05);
+    const targetX = state.width * slotFrac;
+    const targetY = state.height - 16;
+
+    spawnSparkles(startX, startY, 16);
+
+    const clonedFish = targetFish
+      ? { ...targetFish }
+      : {
+          id: fishId,
+          name: 'Caught Phish',
+          colour: '#5DCAA5',
+          shape: 'classic',
+          isWhale: false,
+          x: startX,
+          y: startY,
+          w: 78,
+          h: 42,
+          dir: 1,
+          tilt: 0,
+          tailPhase: 0
+        };
+
+    state.caughtIds.add(fishId);
+    if (state.frozenFishId === fishId) {
+      state.frozenFishId = null;
+    }
+
+    state.catchAnim = {
+      fish: clonedFish,
+      startX,
+      startY,
+      targetX,
+      targetY,
+      scale: 1,
+      alpha: 1,
+      progress: 0,
+      duration: state.reducedMotion ? 1.4 : 0.65
+    };
   }
 
   function onClick(callback) {
@@ -782,6 +949,9 @@
   window.Tank = {
     init,
     setSpecies,
+    setCaughtIds,
+    setFrozenFish,
+    playCatchAnimation,
     getFishAt,
     onClick,
     getFishList: () => state.fishList.slice()
